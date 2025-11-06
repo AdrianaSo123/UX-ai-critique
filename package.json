@@ -1,0 +1,28 @@
+{
+  "name": "ux-design-analyzer",
+  "version": "1.0.0",
+  "description": "An intelligent, automated design feedback system that analyzes websites and provides comprehensive UX improvements through specialized AI agents.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "cli": "node analyzer.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ux",
+    "design",
+    "analyzer",
+    "playwright",
+    "automation",
+    "accessibility",
+    "typography"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "playwright": "^1.56.1"
+  }
+}

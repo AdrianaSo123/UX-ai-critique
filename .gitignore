@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+
+# Screenshots and reports (generated files)
+screenshots/*.png
+screenshots/*.jpg
+reports/*.html
+reports/*.json
+reports/*.pdf
+
+# Keep directory structure but ignore contents
+!screenshots/.gitkeep
+!reports/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build output
+dist/
+build/
+
+# Test coverage
+coverage/
