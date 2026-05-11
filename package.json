@@ -7,6 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "cli": "node analyzer.js",
+    "postinstall": "PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install --with-deps chromium",
     "test": "jest --coverage"
   },
   "keywords": [
