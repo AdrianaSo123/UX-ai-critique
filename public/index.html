@@ -451,6 +451,7 @@
                 <label class="form-label" for="urlInput">Website URL</label>
                 <input type="url" id="urlInput" placeholder="https://example.com">
                 <button id="analyzeBtn" onclick="startAnalysis()">Start Analysis</button>
+                <button id="newAnalysisBtn" onclick="startNewAnalysis()" style="display:none;margin-left:8px;">Start New Analysis</button>
                 <div id="status" class="status"></div>
                 <div id="results" class="results"></div>
             </div>
@@ -469,8 +470,12 @@
             try { new URL(url); } catch (e) { alert('Please enter a valid URL'); return; }
 
             const btn = document.getElementById('analyzeBtn');
+            const newBtn = document.getElementById('newAnalysisBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span>Analyzing<span class="loading"></span></span>';
+            btn.style.display = 'none';
+            newBtn.disabled = true;
+            newBtn.textContent = 'Start New Analysis';
+            newBtn.style.display = 'inline-block';
             document.getElementById('results').classList.remove('show');
             document.getElementById('results').innerHTML = '';
             showStatus('running', 'Initializing analysis...');
@@ -488,8 +493,32 @@
             })
             .catch(error => {
                 showStatus('failed', `Error: ${error.message}`);
-                resetButton();
+                resetButtonsAfterRun();
             });
+        }
+
+        function startNewAnalysis() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+            currentJobId = null;
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('results').innerHTML = '';
+            const statusEl = document.getElementById('status');
+            statusEl.className = 'status';
+            statusEl.innerHTML = '';
+
+            const btn = document.getElementById('analyzeBtn');
+            const newBtn = document.getElementById('newAnalysisBtn');
+            btn.disabled = false;
+            btn.style.display = 'inline-block';
+            newBtn.style.display = 'none';
+            newBtn.disabled = false;
+
+            const urlInput = document.getElementById('urlInput');
+            urlInput.value = '';
+            urlInput.focus();
         }
 
         function pollStatus() {
@@ -503,11 +532,11 @@
                             clearInterval(pollInterval);
                             showStatus('completed', 'Analysis completed');
                             displayResults(data);
-                            resetButton();
+                            resetButtonsAfterRun();
                         } else if (data.status === 'failed') {
                             clearInterval(pollInterval);
                             showStatus('failed', `Failed: ${data.error}`);
-                            resetButton();
+                            resetButtonsAfterRun();
                         }
                     });
             }, 2000);
@@ -519,10 +548,13 @@
             statusEl.innerHTML = message;
         }
 
-        function resetButton() {
+        function resetButtonsAfterRun() {
             const btn = document.getElementById('analyzeBtn');
+            const newBtn = document.getElementById('newAnalysisBtn');
             btn.disabled = false;
-            btn.innerHTML = 'Start Analysis';
+            btn.style.display = 'none';
+            newBtn.disabled = false;
+            newBtn.style.display = 'inline-block';
         }
 
         function displayResults(data) {
@@ -530,33 +562,137 @@
             const summary = data.report.summary;
             let html = '<div class="summary-grid">';
             html += `<div class="stat-card"><div class="stat-number">${summary.totalFindings}</div><div class="stat-label">Findings</div></div>`;
-            html += `<div class="stat-card"><div class="stat-number">${summary.criticalIssues}</div><div class="stat-label">Critical</div></div>`;
+            html += `<div class="stat-card"><div class="stat-number">${summary.criticalIssues}</div><div class="stat-label">${summary.criticalIssues === 0 ? 'No Critical Issues' : 'Critical'}</div></div>`;
             html += `<div class="stat-card"><div class="stat-number">${summary.totalRecommendations}</div><div class="stat-label">Recommendations</div></div>`;
             html += `<div class="stat-card"><div class="stat-number">${summary.agentsUsed}</div><div class="stat-label">Agents</div></div></div>`;
 
+            if (summary.criticalIssues === 0) {
+                html += `<div class="status show completed" style="margin-top:16px;">No critical issues found. Focus on major/minor improvements for the biggest UX lift.</div>`;
+            }
+
+            // Aggregate findings across all agents for summary.
+            // We intentionally bucket similar issues across agents (simple keyword rules),
+            // otherwise overlaps are rare due to slightly different wording.
+            const overlapMap = {};
+            const severityRank = {
+                critical: 3,
+                major: 2,
+                minor: 1,
+            };
+
+            function normalizeText(value) {
+                return String(value || '')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            function bucketFinding(finding) {
+                const title = normalizeText(finding?.title);
+                const description = normalizeText(finding?.description);
+                const text = `${title} ${description}`;
+
+                const rules = [
+                    { key: 'system-status', label: 'System Status Feedback', test: /(system status|status feedback|no feedback|visibility of system status|loading state|loading states)/ },
+                    { key: 'visual-density', label: 'Visual Density / Clutter', test: /(visual density|clutter|cognitive load|many elements|busy layout)/ },
+                    { key: 'responsive-images', label: 'Responsive Images', test: /(non responsive images|non-responsive images|srcset|sizes|oversized images|image\w* overflow|overflowing viewport)/ },
+                    { key: 'touch-targets', label: 'Touch Target Sizing', test: /(touch target)/ },
+                    { key: 'typography', label: 'Typography Readability', test: /(font size|line height|typograph)/ },
+                    { key: 'contrast', label: 'Text Contrast', test: /(contrast)/ },
+                    { key: 'headings', label: 'Heading Hierarchy', test: /(heading hierarchy|heading level|heading\b)/ },
+                    { key: 'reduced-motion', label: 'Reduced Motion Support', test: /(reduced motion|prefers reduced motion|prefers-reduced-motion)/ },
+                ];
+
+                for (const rule of rules) {
+                    if (rule.test.test(text)) {
+                        return { bucketKey: rule.key, bucketTitle: rule.label };
+                    }
+                }
+
+                // Fallback to exact-match bucketing.
+                return {
+                    bucketKey: `exact:${title}|${normalizeText(finding?.severity)}`,
+                    bucketTitle: finding?.title || 'Issue',
+                };
+            }
+            if (data.results?.analysis?.byAgent) {
+                for (const [agentName, agentResults] of Object.entries(data.results.analysis.byAgent)) {
+                    agentResults.forEach(result => {
+                        if (result.findings?.length) {
+                            result.findings.forEach(f => {
+                                const bucket = bucketFinding(f);
+                                const key = bucket.bucketKey;
+                                const incomingSeverity = String(f.severity || '').toLowerCase();
+                                if (!overlapMap[key]) {
+                                    overlapMap[key] = {
+                                        ...f,
+                                        title: bucket.bucketTitle,
+                                        agents: new Set(),
+                                        _severityRank: severityRank[incomingSeverity] || 0,
+                                    };
+                                } else {
+                                    const currentRank = overlapMap[key]._severityRank || 0;
+                                    const nextRank = severityRank[incomingSeverity] || 0;
+                                    if (nextRank > currentRank) {
+                                        overlapMap[key].severity = incomingSeverity;
+                                        overlapMap[key]._severityRank = nextRank;
+                                    }
+                                }
+                                overlapMap[key].agents.add(agentName);
+                            });
+                        }
+                    });
+                }
+            }
+
+            // Top Issues: prefer 2+ agent overlaps; otherwise fall back to overall top issues.
+            const allIssuesArr = Object.values(overlapMap).sort((a, b) => {
+                const aRank = severityRank[String(a.severity || '').toLowerCase()] || 0;
+                const bRank = severityRank[String(b.severity || '').toLowerCase()] || 0;
+                if (bRank !== aRank) return bRank - aRank;
+                const aAgents = a.agents?.size || 0;
+                const bAgents = b.agents?.size || 0;
+                return bAgents - aAgents;
+            });
+            const multiAgentArr = allIssuesArr.filter(item => (item.agents?.size || 0) > 1);
+
+            if (allIssuesArr.length) {
+                const sectionTitle = multiAgentArr.length ? 'Top Issues Found by Multiple Agents' : 'Top Issues';
+                const list = (multiAgentArr.length ? multiAgentArr : allIssuesArr).slice(0, 10);
+                html += `<div class="section-subtitle" style="margin-top:32px;">${sectionTitle}</div>`;
+                html += '<div id="overlap-summary">';
+                list.forEach(item => {
+                    const agentCount = item.agents?.size || 0;
+                    html += `<div class="finding ${item.severity}" style="border-left-width:6px;"><div class="finding-title"><span class="badge ${item.severity}">${item.severity}</span>${item.title}</div><div class="finding-description">${item.description}</div><div style="font-size:0.8em;color:#888;margin-top:4px;">Flagged by ${agentCount} agent${agentCount>1?'s':''}: ${Array.from(item.agents || []).join(', ')}</div></div>`;
+                });
+                html += '</div>';
+            }
+
+            // Screenshots come after summary + top issues.
             if (data.report.screenshots) {
-                html += '<div class="screenshots-grid">';
+                html += `<button id="toggleScreenshots" style="margin:16px 0;padding:8px 16px;font-size:0.9rem;font-weight:700;cursor:pointer;">Show Screenshots</button>`;
+                html += '<div id="screenshotsSection" class="screenshots-grid" style="display:none;">';
                 for (const [device, filename] of Object.entries(data.report.screenshots)) {
                     html += `<div class="screenshot-card"><img src="/screenshots/${filename}" alt="${device}"><div class="screenshot-label">${device}</div></div>`;
                 }
                 html += '</div>';
             }
-
+            // Add button to show/hide agent details
             if (data.results?.analysis?.byAgent) {
+                html += `<button id="toggleAgentDetails" style="margin:24px 0 8px 0;padding:8px 16px;font-size:0.9rem;font-weight:700;cursor:pointer;">Show Agent Details</button>`;
+                html += '<div id="agentDetailsSection" style="display:none;">';
                 let agentNum = 1;
                 for (const [agentName, agentResults] of Object.entries(data.results.analysis.byAgent)) {
                     html += `<div class="agent-section"><div class="agent-header"><div class="agent-number">${String(agentNum++).padStart(2, '0')}</div><div class="agent-info"><h3>${agentName}</h3></div></div>`;
-                    
                     agentResults.forEach(result => {
                         html += `<div class="viewport-label">${result.viewport.toUpperCase()}</div>`;
-                        
                         if (result.findings?.length) {
                             html += '<div class="section-subtitle">Findings</div>';
                             result.findings.forEach(f => {
                                 html += `<div class="finding ${f.severity}"><div class="finding-title"><span class="badge ${f.severity}">${f.severity}</span>${f.title}</div><div class="finding-description">${f.description}</div></div>`;
                             });
                         }
-                        
                         if (result.recommendations?.length) {
                             html += '<div class="section-subtitle">Recommendations</div>';
                             result.recommendations.forEach(r => {
@@ -570,11 +706,40 @@
                     });
                     html += '</div>';
                 }
+                html += '</div>';
             }
 
             html += `<div class="download-section"><div class="download-title">Download Reports</div><div class="download-links"><a href="${data.report.path}" download>JSON</a><a href="${data.report.textPath}" download>TEXT</a></div></div>`;
             resultsEl.innerHTML = html;
             resultsEl.classList.add('show');
+            // Add toggle logic for screenshots
+            const toggleBtn = document.getElementById('toggleScreenshots');
+            const screenshotsSection = document.getElementById('screenshotsSection');
+            if (toggleBtn && screenshotsSection) {
+                toggleBtn.addEventListener('click', function() {
+                    if (screenshotsSection.style.display === 'none') {
+                        screenshotsSection.style.display = 'grid';
+                        toggleBtn.textContent = 'Hide Screenshots';
+                    } else {
+                        screenshotsSection.style.display = 'none';
+                        toggleBtn.textContent = 'Show Screenshots';
+                    }
+                });
+            }
+            // Add toggle logic for agent details
+            const toggleAgentBtn = document.getElementById('toggleAgentDetails');
+            const agentDetailsSection = document.getElementById('agentDetailsSection');
+            if (toggleAgentBtn && agentDetailsSection) {
+                toggleAgentBtn.addEventListener('click', function() {
+                    if (agentDetailsSection.style.display === 'none') {
+                        agentDetailsSection.style.display = 'block';
+                        toggleAgentBtn.textContent = 'Hide Agent Details';
+                    } else {
+                        agentDetailsSection.style.display = 'none';
+                        toggleAgentBtn.textContent = 'Show Agent Details';
+                    }
+                });
+            }
         }
 
         document.getElementById('urlInput').addEventListener('keypress', e => {

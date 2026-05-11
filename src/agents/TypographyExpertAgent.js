@@ -1,4 +1,5 @@
 const BaseAgent = require('./BaseAgent');
+const { withPage } = require('./playwrightUtil');
 
 /**
  * TypographyExpertAgent - Analyzes text presentation and readability
@@ -36,100 +37,97 @@ class TypographyExpertAgent extends BaseAgent {
    * @param {string} url - The original website URL
    */
   async analyze(screenshot, url) {
-    console.log(`${this.name} analyzing ${screenshot.viewport.name} view...`);
-
+    console.log(`${this.name} analyzing ${screenshot.viewport.name} view (dynamic)...`);
     const findings = [];
     const recommendations = [];
 
-    // Example typography analysis
-    
-    findings.push(
-      this.createFinding(
-        'Font Size Analysis',
-        `Body text should be at least ${this.standards.minFontSize[screenshot.viewport.name]}px for optimal readability on ${screenshot.viewport.name} devices.`,
-        'major'
-      )
+    await withPage(
+      {
+        url,
+        viewport: screenshot.viewport,
+        viewportName: screenshot.viewport.name,
+      },
+      async page => {
+        // 1. Font size analysis (sample common text elements)
+        const fontSizes = await page.$$eval('p, li, a, span, label, button', els => {
+          const sizes = [];
+          for (const el of els) {
+            const style = getComputedStyle(el);
+            const size = parseFloat(style.fontSize);
+            if (!Number.isNaN(size)) sizes.push(size);
+          }
+          return sizes;
+        });
+
+        const minFontSize = fontSizes.length ? Math.min(...fontSizes) : null;
+        const targetMin = this.standards.minFontSize[screenshot.viewport.name];
+
+        if (minFontSize !== null && minFontSize < targetMin) {
+          findings.push(this.createFinding(
+            'Font Size Too Small',
+            `Some text is smaller than ${targetMin}px (min detected: ${minFontSize}px).`,
+            'major'
+          ));
+        } else if (minFontSize !== null) {
+          findings.push(this.createFinding(
+            'Font Size OK',
+            `Minimum detected font size meets ${targetMin}px (min detected: ${minFontSize}px).`,
+            'minor'
+          ));
+        }
+
+        // 2. Line height analysis
+        const ratios = await page.$$eval('p, li', els => {
+          const out = [];
+          for (const el of els) {
+            const s = getComputedStyle(el);
+            const fs = parseFloat(s.fontSize);
+            let lh = s.lineHeight;
+            if (!fs || Number.isNaN(fs)) continue;
+            if (lh === 'normal') continue;
+            const lhp = parseFloat(lh);
+            if (!lhp || Number.isNaN(lhp)) continue;
+            out.push(lhp / fs);
+          }
+          return out;
+        });
+
+        if (ratios.length) {
+          const minRatio = Math.min(...ratios);
+          const maxRatio = Math.max(...ratios);
+          if (minRatio < this.standards.lineHeight.min || maxRatio > (this.standards.lineHeight.ideal + 0.4)) {
+            findings.push(this.createFinding(
+              'Line Height Risk',
+              `Detected line-height ratios range from ${minRatio.toFixed(2)} to ${maxRatio.toFixed(2)}. Aim for ~${this.standards.lineHeight.ideal}.`,
+              'minor'
+            ));
+          } else {
+            findings.push(this.createFinding(
+              'Line Height OK',
+              `Detected line-height ratios are within a readable range (min ${minRatio.toFixed(2)}).`,
+              'minor'
+            ));
+          }
+        }
+
+        // 3. Typographic hierarchy: heading level variety
+        const headingTags = await page.$$eval('h1, h2, h3, h4, h5, h6', els => els.map(e => e.tagName.toLowerCase()));
+        const uniqueHeadings = new Set(headingTags);
+        if (uniqueHeadings.size >= 3) {
+          findings.push(this.createFinding(
+            'Typographic Hierarchy Present',
+            `Detected heading levels: ${Array.from(uniqueHeadings).join(', ')}.`,
+            'minor'
+          ));
+        } else {
+          findings.push(this.createFinding(
+            'Weak Typographic Hierarchy',
+            'Fewer than 3 heading levels detected; hierarchy may be unclear.',
+            'major'
+          ));
+        }
+      }
     );
-
-    findings.push(
-      this.createFinding(
-        'Line Height',
-        'Line height (leading) should be between 1.4-1.6 times the font size for comfortable reading.',
-        'minor'
-      )
-    );
-
-    findings.push(
-      this.createFinding(
-        'Typographic Hierarchy',
-        'Establish clear hierarchy using font size, weight, and spacing to distinguish between headings, subheadings, and body text.',
-        'major'
-      )
-    );
-
-    recommendations.push(
-      this.createRecommendation(
-        'Optimize Body Text Readability',
-        'Adjust font size, line height, and line length to meet readability best practices.',
-        'high',
-        'low',
-        [
-          `Set minimum font size to ${this.standards.minFontSize[screenshot.viewport.name]}px`,
-          'Apply line-height: 1.6 for body text',
-          'Limit line length to 45-75 characters',
-          'Use comfortable letter-spacing',
-        ]
-      )
-    );
-
-    recommendations.push(
-      this.createRecommendation(
-        'Enhance Typography Hierarchy',
-        'Create clear visual distinction between heading levels and body text.',
-        'high',
-        'medium',
-        [
-          'Use modular scale for heading sizes (e.g., 1.25, 1.5, 2)',
-          'Apply font-weight to differentiate importance',
-          'Increase spacing above headings',
-          'Consider using different font for headings',
-          'Maintain consistent hierarchy across all pages',
-        ]
-      )
-    );
-
-    recommendations.push(
-      this.createRecommendation(
-        'Improve Text Contrast',
-        'Ensure text meets WCAG AA standards with minimum 4.5:1 contrast ratio.',
-        'critical',
-        'low',
-        [
-          'Test contrast ratios with accessibility tools',
-          'Darken text or lighten backgrounds where needed',
-          'Avoid gray text below #767676 on white',
-          'Consider different color for links',
-        ]
-      )
-    );
-
-    if (screenshot.viewport.name === 'mobile') {
-      recommendations.push(
-        this.createRecommendation(
-          'Mobile Typography Optimization',
-          'Optimize typography specifically for mobile reading experience.',
-          'medium',
-          'low',
-          [
-            'Increase font size for small screens if needed',
-            'Reduce line length for easier reading',
-            'Adjust spacing for touch interfaces',
-            'Test readability in various lighting conditions',
-          ]
-        )
-      );
-    }
-
     return this.generateReport(findings, recommendations);
   }
 }

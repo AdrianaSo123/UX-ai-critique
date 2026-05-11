@@ -1,4 +1,6 @@
 const BaseAgent = require('./BaseAgent');
+const heuristics = require('./ux-heuristics');
+const { withPage } = require('./playwrightUtil');
 
 /**
  * UXDesignerAgent - Analyzes overall user experience and usability
@@ -6,15 +8,8 @@ const BaseAgent = require('./BaseAgent');
  */
 class UXDesignerAgent extends BaseAgent {
   constructor() {
-    super('UX Designer Agent', 'User Experience & Usability');
-    
-    // UX best practices checklist
-    this.checkpoints = {
-      navigation: ['clear hierarchy', 'visible navigation', 'breadcrumbs'],
-      cta: ['clear call-to-action', 'button visibility', 'action hierarchy'],
-      content: ['content hierarchy', 'readability', 'white space'],
-      forms: ['field labels', 'error messages', 'validation'],
-    };
+    super('UX Designer Agent', 'User Experience & Usability (Nielsen Heuristics)');
+    this.heuristics = heuristics;
   }
 
   /**
@@ -23,89 +18,142 @@ class UXDesignerAgent extends BaseAgent {
    * @param {string} url - The original website URL
    */
   async analyze(screenshot, url) {
-    console.log(`${this.name} analyzing ${screenshot.viewport.name} view...`);
-
+    console.log(`${this.name} analyzing ${screenshot.viewport.name} view (dynamic, Nielsen-based)...`);
     const findings = [];
     const recommendations = [];
+    await withPage(
+      {
+        url,
+        viewport: screenshot.viewport,
+        viewportName: screenshot.viewport.name,
+      },
+      async page => {
+        // 1. Visibility of system status
+        const hasLoading = await page.$('[aria-busy="true"], .loading, [role="status"], [aria-live]');
+        if (hasLoading) {
+          findings.push(this.createFinding(
+            'Visibility of System Status',
+            'The site provides feedback about ongoing processes (e.g., loading indicators).',
+            'minor',
+            { framework: 'Nielsen', heuristic: 1, name: heuristics[0].name }
+          ));
+        } else {
+          findings.push(this.createFinding(
+            'No Feedback for System Status',
+            'No visible feedback for loading or ongoing processes was detected.',
+            'major',
+            { framework: 'Nielsen', heuristic: 1, name: heuristics[0].name }
+          ));
+        }
 
-    // Simulate UX analysis (in production, this would use AI/computer vision)
-    // For now, we'll provide example structure for different viewport analyses
-    
-    if (screenshot.viewport.name === 'mobile') {
-      findings.push(
-        this.createFinding(
-          'Touch Target Sizes',
-          'Some interactive elements may be too small for comfortable mobile interaction. Ensure touch targets are at least 44x44 pixels.',
-          'major'
-        )
-      );
+        // 2. Match between system and the real world
+        const navText = await page.$$eval('nav a, nav button', els => els.map(e => (e.textContent || '').trim()).filter(Boolean));
+        if (navText.some(t => /home|about|contact|services|products|pricing|blog/i.test(t))) {
+          findings.push(this.createFinding(
+            'Clear Navigation Labels',
+            'Navigation uses familiar, user-centered language.',
+            'minor',
+            { framework: 'Nielsen', heuristic: 2, name: heuristics[1].name }
+          ));
+        } else if (navText.length) {
+          findings.push(this.createFinding(
+            'Unfamiliar Navigation Labels',
+            'Navigation may use jargon or unclear terms.',
+            'major',
+            { framework: 'Nielsen', heuristic: 2, name: heuristics[1].name }
+          ));
+        }
 
-      recommendations.push(
-        this.createRecommendation(
-          'Optimize Mobile Touch Targets',
-          'Increase button and link sizes for mobile devices to meet minimum touch target requirements.',
-          'high',
-          'low',
-          [
-            'Review all interactive elements',
-            'Apply minimum 44x44px touch target size',
-            'Add adequate spacing between interactive elements',
-            'Test with real users on mobile devices',
-          ]
-        )
-      );
-    }
+        // 3. User control and freedom
+        const hasHome = navText.some(t => /^home$/i.test(t) || /home\b/i.test(t));
+        if (hasHome) {
+          findings.push(this.createFinding(
+            'User Control: Home Link',
+            'A Home link is present, allowing users to recover from navigation errors.',
+            'minor',
+            { framework: 'Nielsen', heuristic: 3, name: heuristics[2].name }
+          ));
+        }
 
-    if (screenshot.viewport.name === 'desktop') {
-      findings.push(
-        this.createFinding(
-          'Information Hierarchy',
-          'The visual hierarchy could be improved to guide users through key content more effectively.',
-          'minor'
-        )
-      );
+        // 4. Consistency and standards
+        const buttonCount = await page.$$eval('button', els => els.length);
+        const linkCount = await page.$$eval('a', els => els.length);
+        if (buttonCount > 0 && linkCount > 0) {
+          findings.push(this.createFinding(
+            'Consistency in Controls',
+            'Buttons and links are both present; check for consistent styling and behavior.',
+            'minor',
+            { framework: 'Nielsen', heuristic: 4, name: heuristics[3].name }
+          ));
+        }
 
-      recommendations.push(
-        this.createRecommendation(
-          'Enhance Visual Hierarchy',
-          'Strengthen the content hierarchy using size, weight, and spacing to guide user attention.',
-          'medium',
-          'medium',
-          [
-            'Use larger headings for primary content',
-            'Increase spacing between sections',
-            'Consider F-pattern or Z-pattern layout',
-            'Highlight primary call-to-action',
-          ]
-        )
-      );
-    }
+        // 5. Error prevention
+        const requiredFields = await page.$$eval('form [required]', els => els.length);
+        if (requiredFields > 0) {
+          findings.push(this.createFinding(
+            'Error Prevention in Forms',
+            'Some form fields are marked as required, helping prevent errors.',
+            'minor',
+            { framework: 'Nielsen', heuristic: 5, name: heuristics[4].name }
+          ));
+        }
 
-    // Add general UX findings applicable to all viewports
-    findings.push(
-      this.createFinding(
-        'User Flow Analysis',
-        'Review the primary user journey to ensure logical flow and minimal friction points.',
-        'minor'
-      )
+        // 6. Recognition rather than recall
+        const hasBreadcrumbs = await page.$('.breadcrumb, nav[aria-label="breadcrumb"], [aria-label*="breadcrumb" i]');
+        if (hasBreadcrumbs) {
+          findings.push(this.createFinding(
+            'Recognition: Breadcrumbs',
+            'Breadcrumb navigation is present, aiding recognition.',
+            'minor',
+            { framework: 'Nielsen', heuristic: 6, name: heuristics[5].name }
+          ));
+        }
+
+        // 7. Flexibility and efficiency of use
+        const hasSearch = await page.$('input[type="search"], [role="search"] input, [role="search"]');
+        if (hasSearch) {
+          findings.push(this.createFinding(
+            'Efficiency: Search Available',
+            'A search feature is present, improving efficiency for expert users.',
+            'minor',
+            { framework: 'Nielsen', heuristic: 7, name: heuristics[6].name }
+          ));
+        }
+
+        // 8. Aesthetic and minimalist design
+        const elementCount = await page.$$eval('body *', els => els.length);
+        if (elementCount > 400) {
+          findings.push(this.createFinding(
+            'Potential Clutter',
+            'The page has a very high number of elements, which may increase cognitive load.',
+            'minor',
+            { framework: 'Nielsen', heuristic: 8, name: heuristics[7].name, elementCount }
+          ));
+        }
+
+        // 9. Help users recognize, diagnose, and recover from errors
+        const hasError = await page.$('.error, [role="alert"], .alert, .alert-danger');
+        if (hasError) {
+          findings.push(this.createFinding(
+            'Error Feedback Present',
+            'Error/alert patterns are present and visible to users (verify clarity and helpfulness).',
+            'minor',
+            { framework: 'Nielsen', heuristic: 9, name: heuristics[8].name }
+          ));
+        }
+
+        // 10. Help and documentation
+        const hasHelp = await page.$('a[href*="help" i], a[href*="faq" i], a[href*="support" i], [role="doc-help"]');
+        if (hasHelp) {
+          findings.push(this.createFinding(
+            'Help/Documentation Available',
+            'Help or documentation links are present.',
+            'minor',
+            { framework: 'Nielsen', heuristic: 10, name: heuristics[9].name }
+          ));
+        }
+      }
     );
-
-    recommendations.push(
-      this.createRecommendation(
-        'Simplify User Journey',
-        'Streamline the path to key actions by reducing steps and cognitive load.',
-        'high',
-        'high',
-        [
-          'Map current user journeys',
-          'Identify friction points and drop-off areas',
-          'Reduce form fields and required steps',
-          'Add progress indicators for multi-step processes',
-          'Conduct user testing to validate improvements',
-        ]
-      )
-    );
-
     return this.generateReport(findings, recommendations);
   }
 }

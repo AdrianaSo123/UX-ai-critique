@@ -5,6 +5,7 @@ require('dotenv').config();
 const UXDesignAnalyzer = require('./src/index');
 const validateUrl = require('./src/validateUrl');
 const logger = require('./src/logger');
+const pathModule = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,7 +13,14 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('public', {
+  etag: false,
+  lastModified: false,
+  maxAge: 0,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store');
+  },
+}));
 app.use('/screenshots', express.static('screenshots'));
 app.use('/reports', express.static('reports'));
 
@@ -23,6 +31,7 @@ const jobs = new Map();
  * Home page
  */
 app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -93,9 +102,12 @@ async function runAnalysis(jobId, url) {
     // Update job with results
     job.status = 'completed';
     job.completedAt = new Date().toISOString();
+
+    const reportFilename = pathModule.basename(report.path);
+    const textFilename = pathModule.basename(report.textPath);
     job.report = {
-      path: report.path,
-      textPath: report.textPath,
+      path: `/reports/${reportFilename}`,
+      textPath: `/reports/${textFilename}`,
       summary: report.data.summary,
       screenshots: report.data.screenshots,
     };

@@ -4,8 +4,7 @@ module.exports = [
   body('url')
     .exists().withMessage('URL is required')
     .isURL().withMessage('Invalid URL format')
-    .trim()
-    .escape(),
+    .trim(),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

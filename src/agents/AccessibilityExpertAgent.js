@@ -1,4 +1,5 @@
 const BaseAgent = require('./BaseAgent');
+const { withPage } = require('./playwrightUtil');
 
 /**
  * Accessibility Expert Agent
@@ -13,7 +14,7 @@ class AccessibilityExpertAgent extends BaseAgent {
    * Analyze accessibility compliance
    * @param {Object} screenshot - Screenshot data with path and viewport info
    */
-  async analyze(screenshot) {
+  async analyze(screenshot, url) {
     const viewport = screenshot.viewport.name;
     
     console.log(`[${this.name}] Analyzing ${viewport} accessibility...`);
@@ -21,237 +22,197 @@ class AccessibilityExpertAgent extends BaseAgent {
     const findings = [];
     const recommendations = [];
 
-    // Color contrast and visual accessibility
-    findings.push(
-      this.createFinding(
-        'Color Contrast Compliance',
-        'WCAG AA requires 4.5:1 contrast for normal text, 3:1 for large text',
-        'critical'
-      )
-    );
+    await withPage(
+      {
+        url,
+        viewport: screenshot.viewport,
+        viewportName: viewport,
+      },
+      async page => {
+        const a11y = await page.evaluate(() => {
+          const visibleTextEls = Array.from(document.querySelectorAll('p, a, li, span, label, button'))
+            .filter(el => (el.textContent || '').trim().length > 10)
+            .slice(0, 60);
 
-    findings.push(
-      this.createFinding(
-        'Color-Only Information',
-        'Information should not be conveyed by color alone (affects color-blind users)',
-        'major'
-      )
-    );
+          const parseRGB = s => {
+            const m = (s || '').match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([0-9.]+))?\)/i);
+            if (!m) return null;
+            return {
+              r: Number(m[1]),
+              g: Number(m[2]),
+              b: Number(m[3]),
+              a: m[4] !== undefined ? Number(m[4]) : 1,
+            };
+          };
 
-    recommendations.push(
-      this.createRecommendation(
-        'Audit Color Contrast Ratios',
-        'Ensure all text meets WCAG AA standards (AAA preferred for body text)',
-        'critical',
-        [
-          'Test all text/background combinations with contrast checker tools',
-          'Aim for 4.5:1 minimum for normal text (<18pt)',
-          'Aim for 3:1 minimum for large text (≥18pt or ≥14pt bold)',
-          'Check contrast for UI controls, buttons, and form inputs',
-          'Test in different color modes (light/dark theme)',
-          'Consider color-blind simulation tools'
-        ]
-      )
-    );
+          const srgbToLin = c => {
+            const v = c / 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+          };
 
-    recommendations.push(
-      this.createRecommendation(
-        'Add Non-Color Indicators',
-        'Use icons, patterns, or text labels alongside color-coded information',
-        'high',
-          'medium',
-        [
-          'Add icons to success/warning/error messages',
-          'Use patterns or textures in charts and graphs',
-          'Include text labels for status indicators',
-          'Add underlines to links (not just color)',
-          'Use shapes in addition to colors for data visualization'
-        ]
-      )
-    );
+          const luminance = rgb => 0.2126 * srgbToLin(rgb.r) + 0.7152 * srgbToLin(rgb.g) + 0.0722 * srgbToLin(rgb.b);
 
-    // Screen reader and semantic HTML
-    findings.push(
-      this.createFinding(
-        'Semantic HTML Structure',
-        'Proper HTML5 semantic elements improve screen reader navigation',
-        'major'
-      )
-    );
+          const contrastRatio = (fg, bg) => {
+            const L1 = luminance(fg);
+            const L2 = luminance(bg);
+            const hi = Math.max(L1, L2);
+            const lo = Math.min(L1, L2);
+            return (hi + 0.05) / (lo + 0.05);
+          };
 
-    findings.push(
-      this.createFinding(
-        'Alternative Text',
-        'All images need descriptive alt text for screen reader users',
-        'critical'
-      )
-    );
+          const effectiveBg = el => {
+            let cur = el;
+            while (cur && cur !== document.documentElement) {
+              const bg = parseRGB(getComputedStyle(cur).backgroundColor);
+              if (bg && bg.a !== 0) return bg;
+              cur = cur.parentElement;
+            }
+            return parseRGB(getComputedStyle(document.body).backgroundColor) || { r: 255, g: 255, b: 255, a: 1 };
+          };
 
-    recommendations.push(
-      this.createRecommendation(
-        'Implement Semantic HTML',
-        'Use proper HTML5 elements for better accessibility and SEO',
-        'high',
-          'medium',
-        [
-          'Use <header>, <nav>, <main>, <article>, <aside>, <footer>',
-          'Implement proper heading hierarchy (h1 → h6, no skipping)',
-          'Use <button> for clickable actions, <a> for navigation',
-          'Add ARIA landmarks for complex layouts',
-          'Use <label> elements for all form inputs',
-          'Implement proper list structures (<ul>, <ol>) for grouped content'
-        ]
-      )
-    );
+          let lowContrastCount = 0;
+          for (const el of visibleTextEls) {
+            const fg = parseRGB(getComputedStyle(el).color);
+            if (!fg) continue;
+            const bg = effectiveBg(el);
+            if (!bg) continue;
+            const ratio = contrastRatio(fg, bg);
+            if (ratio < 4.5) lowContrastCount++;
+          }
 
-    recommendations.push(
-      this.createRecommendation(
-        'Add Descriptive Alt Text',
-        'Every meaningful image needs alt text; decorative images need alt=""',
-        'critical',
-        [
-          'Write concise, descriptive alt text (avoid "image of")',
-          'Use alt="" for purely decorative images',
-          'Include text from images in alt attribute',
-          'For complex images (charts), provide longer descriptions',
-          'Test with screen reader (VoiceOver, NVDA, JAWS)',
-          'Add aria-label for icon-only buttons'
-        ]
-      )
-    );
+          const imgs = Array.from(document.images || []);
+          const missingAlt = imgs.filter(img => img.getBoundingClientRect().width > 0 && !img.hasAttribute('alt')).length;
 
-    // Keyboard navigation (viewport-specific)
-    if (viewport === 'desktop') {
-      findings.push(
-        this.createFinding(
-          'Keyboard Navigation',
-          'All functionality must be accessible via keyboard alone',
-          'critical'
-        )
-      );
+          const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).map(h => Number(h.tagName.substring(1)));
+          let headingSkips = 0;
+          for (let i = 1; i < headings.length; i++) {
+            if (headings[i] - headings[i - 1] > 1) headingSkips++;
+          }
 
-      recommendations.push(
-        this.createRecommendation(
-          'Ensure Full Keyboard Access',
-          'Test and optimize complete keyboard navigation support',
-          'critical',
-          [
-            'All interactive elements accessible via Tab/Shift+Tab',
-            'Visible focus indicators with 3:1 contrast ratio',
-            'Logical tab order matching visual layout',
-            'Enter/Space activate buttons, Enter submits forms',
-            'Escape closes modals/dropdowns',
-            'Arrow keys for radio groups and select dropdowns',
-            'Skip-to-content link as first focusable element'
-          ]
-        )
-      );
-    }
+          const inputs = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'));
+          const unlabeled = inputs.filter(input => {
+            const id = input.getAttribute('id');
+            const hasLabelFor = id ? !!document.querySelector(`label[for="${CSS.escape(id)}"]`) : false;
+            const wrappedLabel = !!input.closest('label');
+            const ariaLabel = input.hasAttribute('aria-label') || input.hasAttribute('aria-labelledby');
+            return !(hasLabelFor || wrappedLabel || ariaLabel);
+          }).length;
 
-    // Touch accessibility for mobile
-    if (viewport === 'mobile') {
-      findings.push(
-        this.createFinding(
-          'Touch Target Size',
-          'WCAG requires minimum 44x44px touch targets for mobile',
-          'major'
-        )
-      );
+          const hasReducedMotion = (() => {
+            for (const sheet of Array.from(document.styleSheets)) {
+              let rules;
+              try { rules = sheet.cssRules; } catch { continue; }
+              if (!rules) continue;
+              for (const rule of Array.from(rules)) {
+                if (rule.type === CSSRule.MEDIA_RULE && (rule.conditionText || '').includes('prefers-reduced-motion')) {
+                  return true;
+                }
+              }
+            }
+            return false;
+          })();
 
-      recommendations.push(
-        this.createRecommendation(
-          'Optimize Touch Targets',
-          'Ensure all interactive elements are easy to tap on mobile devices',
-          'high',
-          'medium',
-          [
-            'Minimum 44x44px (iOS) or 48x48dp (Android) touch targets',
-            'Add sufficient spacing between adjacent touch targets',
-            'Increase tap area beyond visible button size if needed',
-            'Test with various finger sizes and dexterity levels',
-            'Avoid placing critical actions at screen edges'
-          ]
-        )
-      );
-    }
+          const hasSkipLink = !!document.querySelector('a[href^="#"]');
 
-    // Forms and input accessibility
-    findings.push(
-      this.createFinding(
-        'Form Accessibility',
-        'Forms require proper labels, error messaging, and validation feedback',
-        'major'
-      )
-    );
+          return {
+            lowContrastCount,
+            sampledTextCount: visibleTextEls.length,
+            missingAlt,
+            headingSkips,
+            unlabeled,
+            totalInputs: inputs.length,
+            hasReducedMotion,
+            hasSkipLink,
+          };
+        });
 
-    recommendations.push(
-      this.createRecommendation(
-        'Enhance Form Accessibility',
-        'Implement comprehensive accessible form patterns',
-        'high',
-          'medium',
-        [
-          'Associate <label> with every form input (for/id matching)',
-          'Use placeholder text as hints, not labels',
-          'Add aria-required="true" for required fields',
-          'Show inline validation with both visual and text feedback',
-          'Group related inputs with <fieldset> and <legend>',
-          'Display error messages near relevant fields',
-          'Use autocomplete attributes for common fields',
-          'Announce validation errors to screen readers (aria-live)'
-        ]
-      )
-    );
+        if (a11y.sampledTextCount && a11y.lowContrastCount > 0) {
+          findings.push(this.createFinding(
+            'Low Text Contrast Detected',
+            `${a11y.lowContrastCount} of ${a11y.sampledTextCount} sampled text elements appear below ~4.5:1 contrast (best-effort estimate).`,
+            a11y.lowContrastCount > 10 ? 'critical' : 'major',
+            { wcag: '1.4.3', sample: a11y }
+          ));
+          recommendations.push(this.createRecommendation(
+            'Fix Color Contrast',
+            'Adjust text/background colors to meet WCAG AA (4.5:1 for normal text).',
+            'critical',
+            'medium',
+            [
+              'Use a contrast checker to validate key text styles',
+              'Darken text or lighten backgrounds for body copy',
+              'Re-check links, disabled states, and form hints',
+            ]
+          ));
+        }
 
-    // Motion and animation
-    findings.push(
-      this.createFinding(
-        'Animation & Motion',
-        'Respect prefers-reduced-motion for users with vestibular disorders',
-        'major'
-      )
-    );
+        if (a11y.missingAlt > 0) {
+          findings.push(this.createFinding(
+            'Missing Alt Attributes',
+            `${a11y.missingAlt} image(s) are missing an ` + 'alt' + ` attribute (decorative images should still use alt="").`,
+            'critical',
+            { wcag: '1.1.1', sample: a11y }
+          ));
+          recommendations.push(this.createRecommendation(
+            'Add Alt Text',
+            'Add meaningful alt text to informative images and empty alt to decorative images.',
+            'critical',
+            'low',
+            [
+              'Add alt text that conveys purpose, not appearance',
+              'Use alt="" for decorative images',
+              'Ensure icon-only buttons have aria-label',
+            ]
+          ));
+        }
 
-    recommendations.push(
-      this.createRecommendation(
-        'Implement Reduced Motion Support',
-        'Provide alternative experiences for users who prefer reduced motion',
-        'high',
-          'medium',
-        [
-          'Detect prefers-reduced-motion media query',
-          'Disable or reduce non-essential animations',
-          'Replace animations with instant transitions or fades',
-          'Maintain functionality without relying on animations',
-          'Avoid auto-playing videos or carousels',
-          'Provide play/pause controls for all motion content'
-        ]
-      )
-    );
+        if (a11y.headingSkips > 0) {
+          findings.push(this.createFinding(
+            'Heading Hierarchy Issues',
+            `Detected ${a11y.headingSkips} heading level skip(s) (e.g., h2 → h4), which can confuse assistive tech navigation.`,
+            'major',
+            { wcag: '1.3.1', sample: a11y }
+          ));
+        }
 
-    // Text and readability
-    findings.push(
-      this.createFinding(
-        'Text Resizing',
-        'Content should remain usable at 200% zoom without horizontal scrolling',
-        'major'
-      )
-    );
+        if (a11y.totalInputs > 0 && a11y.unlabeled > 0) {
+          findings.push(this.createFinding(
+            'Form Inputs Missing Accessible Labels',
+            `${a11y.unlabeled} of ${a11y.totalInputs} inputs appear unlabeled (no <label>, aria-label, or aria-labelledby).`,
+            'major',
+            { wcag: '3.3.2', sample: a11y }
+          ));
+          recommendations.push(this.createRecommendation(
+            'Label Form Controls',
+            'Ensure every input has a programmatically-associated label.',
+            'high',
+            'low',
+            [
+              'Use <label for="id"> and matching input id',
+              'Avoid placeholder-only labels',
+              'Use aria-label only when a visible label is not feasible',
+            ]
+          ));
+        }
 
-    recommendations.push(
-      this.createRecommendation(
-        'Support Text Scaling',
-        'Ensure layouts adapt gracefully to increased text sizes',
-        'medium',
-        [
-          'Use relative units (rem, em) instead of pixels for font sizes',
-          'Test at 200% browser zoom level',
-          'Avoid fixed-height containers for text content',
-          'Ensure no horizontal scrolling at increased zoom',
-          'Allow text reflow on mobile when zoomed',
-          'Test with browser accessibility features enabled'
-        ]
-      )
+        if (!a11y.hasReducedMotion) {
+          findings.push(this.createFinding(
+            'No Reduced Motion Support Detected',
+            'No `prefers-reduced-motion` media query detected (best-effort check).',
+            'minor',
+            { wcag: '2.3.3', sample: a11y }
+          ));
+        }
+
+        if (viewport === 'desktop' && !a11y.hasSkipLink) {
+          findings.push(this.createFinding(
+            'Missing Skip Link',
+            'No obvious skip-to-content link detected; this can slow keyboard navigation.',
+            'minor',
+            { wcag: '2.4.1', sample: a11y }
+          ));
+        }
+      }
     );
 
     return this.generateReport(findings, recommendations);

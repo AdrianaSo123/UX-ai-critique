@@ -95,6 +95,14 @@ Our system employs multiple specialized agents, each with deep expertise in thei
 
 ## 📈 Getting Started
 
+### API Keys
+
+This project does **not** require any external API keys (OpenAI/Anthropic/etc.). All analysis runs locally using Playwright to inspect the live DOM/CSS.
+
+### Environment Variables
+
+- `PORT` (optional): web server port (defaults to `3000`)
+
 ### Installation
 
 ```bash

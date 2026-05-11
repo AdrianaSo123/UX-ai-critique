@@ -5,6 +5,7 @@ const InteractionDesignerAgent = require('./agents/InteractionDesignerAgent');
 const GraphicDesignerAgent = require('./agents/GraphicDesignerAgent');
 const ResponsiveDesignAgent = require('./agents/ResponsiveDesignAgent');
 const AccessibilityExpertAgent = require('./agents/AccessibilityExpertAgent');
+const { closeSharedBrowser } = require('./agents/playwrightUtil');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -64,6 +65,7 @@ class UXDesignAnalyzer {
       throw error;
     } finally {
       await this.capture.close();
+      await closeSharedBrowser();
     }
   }
 

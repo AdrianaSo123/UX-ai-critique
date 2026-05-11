@@ -1,4 +1,5 @@
 const BaseAgent = require('./BaseAgent');
+const { withPage } = require('./playwrightUtil');
 
 /**
  * Interaction Designer Agent
@@ -13,7 +14,7 @@ class InteractionDesignerAgent extends BaseAgent {
    * Analyze interaction design patterns
    * @param {Object} screenshot - Screenshot data with path and viewport info
    */
-  async analyze(screenshot) {
+  async analyze(screenshot, url) {
     const viewport = screenshot.viewport.name;
     
     console.log(`[${this.name}] Analyzing ${viewport} interactions...`);
@@ -21,171 +22,156 @@ class InteractionDesignerAgent extends BaseAgent {
     const findings = [];
     const recommendations = [];
 
-    // Mobile-specific interaction analysis
-    if (viewport === 'mobile') {
-      findings.push(
-        this.createFinding(
-          'Touch Target Sizing',
-          'Interactive elements should be at least 44x44px for comfortable touch interaction',
-          'major'
-        )
-      );
+    await withPage(
+      {
+        url,
+        viewport: screenshot.viewport,
+        viewportName: viewport,
+      },
+      async page => {
+        // Touch target sizing (primarily relevant on mobile/tablet)
+        const minTarget = 44;
+        const tapStats = await page.evaluate(minPx => {
+          const candidates = Array.from(
+            document.querySelectorAll('a, button, input, select, textarea, [role="button"], [tabindex]')
+          ).filter(el => {
+            const style = getComputedStyle(el);
+            if (style.visibility === 'hidden' || style.display === 'none') return false;
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+          });
 
-      findings.push(
-        this.createFinding(
-          'Swipe Gestures',
-          'Limited visual affordances for swipe-based navigation detected',
-          'minor'
-        )
-      );
+          let tooSmall = 0;
+          let total = 0;
+          let minW = Infinity;
+          let minH = Infinity;
 
-      recommendations.push(
-        this.createRecommendation(
-          'Implement Touch-Friendly Controls',
-          'Ensure all buttons, links, and interactive elements meet minimum touch target size of 44x44px with adequate spacing',
-          'high',
-          'medium',
-          [
-            'Audit all clickable elements for minimum size compliance',
-            'Add padding around smaller interactive elements',
-            'Implement visual feedback for touch interactions (active states)',
-            'Test with actual device touch interactions'
-          ]
-        )
-      );
+          for (const el of candidates) {
+            const rect = el.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            if (!w || !h) continue;
+            total++;
+            minW = Math.min(minW, w);
+            minH = Math.min(minH, h);
+            if (w < minPx || h < minPx) tooSmall++;
+          }
 
-      recommendations.push(
-        this.createRecommendation(
-          'Add Gesture Indicators',
-          'Include visual cues for swipeable content (dots, arrows, or edge shadows)',
-          'medium',
-          'low',
-          [
-            'Add pagination dots for carousels and galleries',
-            'Implement subtle edge gradients for horizontal scrollable content',
-            'Include left/right arrows for desktop users',
-            'Add haptic feedback for native mobile apps'
-          ]
-        )
-      );
-    }
+          return {
+            total,
+            tooSmall,
+            minW: Number.isFinite(minW) ? Math.round(minW) : null,
+            minH: Number.isFinite(minH) ? Math.round(minH) : null,
+          };
+        }, minTarget);
 
-    // Tablet-specific interaction analysis
-    if (viewport === 'tablet') {
-      findings.push(
-        this.createFinding(
-          'Hover State Ambiguity',
-          'Tablets support both touch and hover interactions - design should accommodate both',
-          'minor'
-        )
-      );
+        if (viewport !== 'desktop' && tapStats.total > 0) {
+          const ratio = tapStats.tooSmall / tapStats.total;
+          if (ratio > 0.15) {
+            findings.push(this.createFinding(
+              'Touch Target Sizing',
+              `${tapStats.tooSmall} of ${tapStats.total} interactive elements are smaller than ${minTarget}x${minTarget}px (min detected: ${tapStats.minW}x${tapStats.minH}).`,
+              ratio > 0.35 ? 'major' : 'minor'
+            ));
+            recommendations.push(this.createRecommendation(
+              'Improve Touch Targets',
+              `Increase tap target size to at least ${minTarget}x${minTarget}px and add spacing between adjacent targets.`,
+              'high',
+              'medium',
+              [
+                'Audit primary CTAs, nav items, and form controls',
+                `Increase padding to reach ${minTarget}px minimum size`,
+                'Add spacing between adjacent links/buttons',
+                'Verify on real devices (not only emulator)',
+              ]
+            ));
+          }
+        }
 
-      recommendations.push(
-        this.createRecommendation(
-          'Hybrid Interaction Design',
-          'Design interactions that work well for both touch and hover-capable input methods',
-          'medium',
-          'medium',
-          [
-            'Avoid hover-only interactions (use tap/click instead)',
-            'Implement visible active states for touch feedback',
-            'Make dropdowns work with both tap and hover',
-            'Test with iPad + trackpad scenarios'
-          ]
-        )
-      );
-    }
+        // Focus visibility (keyboard navigation) — detect any :focus-visible rules or outline suppression
+        const focusSignals = await page.evaluate(() => {
+          let hasFocusVisibleRule = false;
+          let suppressesOutline = false;
 
-    // Desktop-specific interaction analysis
-    if (viewport === 'desktop') {
-      findings.push(
-        this.createFinding(
-          'Hover State Design',
-          'Desktop users expect rich hover feedback for interactive elements',
-          'minor'
-        )
-      );
+          const styleSheets = Array.from(document.styleSheets);
+          for (const sheet of styleSheets) {
+            let rules;
+            try {
+              rules = sheet.cssRules;
+            } catch {
+              continue;
+            }
+            if (!rules) continue;
 
-      findings.push(
-        this.createFinding(
-          'Keyboard Navigation',
-          'Keyboard accessibility requires proper focus indicators and tab order',
-          'major'
-        )
-      );
+            for (const rule of Array.from(rules)) {
+              const text = rule.cssText || '';
+              if (text.includes(':focus-visible') || text.includes(':focus')) hasFocusVisibleRule = true;
+              if (text.includes('outline: none') || text.includes('outline:none')) suppressesOutline = true;
+            }
+          }
+          return { hasFocusVisibleRule, suppressesOutline };
+        });
 
-      recommendations.push(
-        this.createRecommendation(
-          'Enhance Hover Micro-interactions',
-          'Add smooth transitions, tooltips, and visual feedback for desktop hover states',
-          'high',
-          'medium',
-          [
-            'Implement 0.2-0.3s transitions for hover effects',
-            'Add cursor: pointer for all clickable elements',
-            'Show tooltips on icon-only buttons',
-            'Use color shifts or elevation changes for hover feedback',
-            'Add subtle scale or lift effects for cards/buttons'
-          ]
-        )
-      );
+        if (viewport === 'desktop') {
+          if (focusSignals.suppressesOutline && !focusSignals.hasFocusVisibleRule) {
+            findings.push(this.createFinding(
+              'Keyboard Focus Visibility',
+              'The site appears to suppress outlines without providing explicit focus styling, which can break keyboard navigation.',
+              'major'
+            ));
+            recommendations.push(this.createRecommendation(
+              'Add Focus Styles',
+              'Ensure all interactive elements have visible `:focus-visible` styles with sufficient contrast.',
+              'high',
+              'medium',
+              [
+                'Add `:focus-visible` styles for links, buttons, and inputs',
+                'Avoid blanket `outline: none` without replacements',
+                'Test tab order and focus visibility end-to-end',
+              ]
+            ));
+          }
+        }
 
-      recommendations.push(
-        this.createRecommendation(
-          'Implement Keyboard Navigation',
-          'Ensure complete keyboard accessibility with visible focus indicators',
-          'high',
-          'medium',
-          [
-            'Add :focus-visible styles for all interactive elements',
-            'Maintain logical tab order (left-to-right, top-to-bottom)',
-            'Implement skip-to-content links',
-            'Add keyboard shortcuts for common actions',
-            'Test navigation with Tab, Shift+Tab, and Arrow keys'
-          ]
-        )
-      );
-    }
+        // Hover affordances (desktop): detect presence of :hover rules
+        if (viewport === 'desktop') {
+          const hasHoverRules = await page.evaluate(() => {
+            const styleSheets = Array.from(document.styleSheets);
+            for (const sheet of styleSheets) {
+              let rules;
+              try {
+                rules = sheet.cssRules;
+              } catch {
+                continue;
+              }
+              if (!rules) continue;
+              for (const rule of Array.from(rules)) {
+                const t = rule.cssText || '';
+                if (t.includes(':hover')) return true;
+              }
+            }
+            return false;
+          });
 
-    // Universal interaction patterns
-    findings.push(
-      this.createFinding(
-        'Loading States',
-        'User feedback during async operations improves perceived performance',
-        'minor'
-      )
-    );
+          if (!hasHoverRules) {
+            findings.push(this.createFinding(
+              'Hover Feedback',
+              'No CSS `:hover` rules were detected; interactive affordances may feel flat on desktop.',
+              'minor'
+            ));
+          }
+        }
 
-    recommendations.push(
-      this.createRecommendation(
-        'Add Loading & Empty States',
-        'Implement skeleton screens, spinners, and helpful empty state messages',
-        'high',
-          'medium',
-        [
-          'Use skeleton screens for content that takes >500ms to load',
-          'Add spinner indicators for buttons with async actions',
-          'Show progress bars for multi-step processes',
-          'Design helpful empty states with clear next actions',
-          'Implement optimistic UI updates where appropriate'
-        ]
-      )
-    );
-
-    recommendations.push(
-      this.createRecommendation(
-        'Enhance Button States',
-        'Clearly communicate all interaction states (default, hover, active, disabled, loading)',
-        'medium',
-        'low',
-        [
-          'Design distinct visual states for each interaction phase',
-          'Add loading spinners to buttons during async operations',
-          'Disable buttons after click to prevent double-submission',
-          'Use reduced opacity and cursor: not-allowed for disabled states',
-          'Add success/error feedback after form submissions'
-        ]
-      )
+        // Loading/status patterns
+        const hasStatus = await page.$('[role="status"], [aria-live], .loading, .spinner');
+        if (!hasStatus) {
+          findings.push(this.createFinding(
+            'Loading States',
+            'No obvious loading/status patterns detected; users may not get feedback during async operations.',
+            'minor'
+          ));
+        }
+      }
     );
 
     return this.generateReport(findings, recommendations);
