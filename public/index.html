@@ -463,6 +463,41 @@
     <script>
         let currentJobId = null;
         let pollInterval = null;
+        let apiBaseUrl = '';
+
+        function normalizeApiBaseUrl(value) {
+            const v = String(value || '').trim();
+            return v.endsWith('/') ? v.slice(0, -1) : v;
+        }
+
+        async function resolveApiBaseUrl() {
+            if (apiBaseUrl) return apiBaseUrl;
+            try {
+                const res = await fetch('/api/config', { cache: 'no-store' });
+                if (!res.ok) return '';
+                const data = await res.json();
+                apiBaseUrl = normalizeApiBaseUrl(data?.apiBaseUrl);
+                return apiBaseUrl;
+            } catch {
+                return '';
+            }
+        }
+
+        async function apiFetch(path, options) {
+            const base = await resolveApiBaseUrl();
+            const url = base ? `${base}${path}` : path;
+            return fetch(url, options);
+        }
+
+        function toAbsoluteBackendUrl(maybeRelativeUrl) {
+            const base = normalizeApiBaseUrl(apiBaseUrl);
+            const href = String(maybeRelativeUrl || '');
+            if (!base) return href;
+            if (!href) return href;
+            if (/^https?:\/\//i.test(href)) return href;
+            if (href.startsWith('/')) return `${base}${href}`;
+            return `${base}/${href}`;
+        }
 
         function startAnalysis() {
             const url = document.getElementById('urlInput').value.trim();
@@ -480,7 +515,7 @@
             document.getElementById('results').innerHTML = '';
             showStatus('running', 'Initializing analysis...');
 
-            fetch('/api/analyze', {
+            apiFetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url }),
@@ -523,7 +558,7 @@
 
         function pollStatus() {
             pollInterval = setInterval(() => {
-                fetch(`/api/analyze/${currentJobId}`)
+                apiFetch(`/api/analyze/${currentJobId}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.status === 'running') {
@@ -674,7 +709,8 @@
                 html += `<button id="toggleScreenshots" style="margin:16px 0;padding:8px 16px;font-size:0.9rem;font-weight:700;cursor:pointer;">Show Screenshots</button>`;
                 html += '<div id="screenshotsSection" class="screenshots-grid" style="display:none;">';
                 for (const [device, filename] of Object.entries(data.report.screenshots)) {
-                    html += `<div class="screenshot-card"><img src="/screenshots/${filename}" alt="${device}"><div class="screenshot-label">${device}</div></div>`;
+                    const imgUrl = toAbsoluteBackendUrl(`/screenshots/${filename}`);
+                    html += `<div class="screenshot-card"><img src="${imgUrl}" alt="${device}"><div class="screenshot-label">${device}</div></div>`;
                 }
                 html += '</div>';
             }
@@ -709,7 +745,9 @@
                 html += '</div>';
             }
 
-            html += `<div class="download-section"><div class="download-title">Download Reports</div><div class="download-links"><a href="${data.report.path}" download>JSON</a><a href="${data.report.textPath}" download>TEXT</a></div></div>`;
+            const jsonReportUrl = toAbsoluteBackendUrl(data.report.path);
+            const textReportUrl = toAbsoluteBackendUrl(data.report.textPath);
+            html += `<div class="download-section"><div class="download-title">Download Reports</div><div class="download-links"><a href="${jsonReportUrl}" download>JSON</a><a href="${textReportUrl}" download>TEXT</a></div></div>`;
             resultsEl.innerHTML = html;
             resultsEl.classList.add('show');
             // Add toggle logic for screenshots

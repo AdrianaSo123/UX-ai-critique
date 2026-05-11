@@ -130,6 +130,16 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+/**
+ * Frontend config endpoint (useful for Vercel-hosted frontend + external API)
+ */
+app.get('/api/config', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({
+    apiBaseUrl: process.env.ANALYZER_API_BASE_URL || '',
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   logger.info('========================================');
