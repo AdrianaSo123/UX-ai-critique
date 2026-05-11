@@ -1,0 +1,1247 @@
+═══════════════════════════════════════════════════════
+          UX DESIGN ANALYSIS REPORT
+═══════════════════════════════════════════════════════
+
+Website: https://www.apple.com
+Date: 5/11/2026, 12:03:17 AM
+
+───────────────────────────────────────────────────────
+EXECUTIVE SUMMARY
+───────────────────────────────────────────────────────
+
+Total Findings: 87
+  • Critical Issues: 8
+  • Major Issues: 48
+  • Minor Issues: 31
+
+Total Recommendations: 97
+Agents Used: 6
+Viewports Analyzed: 3
+
+═══════════════════════════════════════════════════════
+UX DESIGNER AGENT
+═══════════════════════════════════════════════════════
+
+Viewport: mobile
+Specialty: User Experience & Usability
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Touch Target Sizes
+   Some interactive elements may be too small for comfortable mobile interaction. Ensure touch targets are at least 44x44 pixels.
+
+2. [MINOR] User Flow Analysis
+   Review the primary user journey to ensure logical flow and minimal friction points.
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Optimize Mobile Touch Targets
+   Priority: high | Effort: low
+   Increase button and link sizes for mobile devices to meet minimum touch target requirements.
+   Implementation:
+     • Review all interactive elements
+     • Apply minimum 44x44px touch target size
+     • Add adequate spacing between interactive elements
+     • Test with real users on mobile devices
+
+2. Simplify User Journey
+   Priority: high | Effort: high
+   Streamline the path to key actions by reducing steps and cognitive load.
+   Implementation:
+     • Map current user journeys
+     • Identify friction points and drop-off areas
+     • Reduce form fields and required steps
+     • Add progress indicators for multi-step processes
+     • Conduct user testing to validate improvements
+
+
+Viewport: tablet
+Specialty: User Experience & Usability
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MINOR] User Flow Analysis
+   Review the primary user journey to ensure logical flow and minimal friction points.
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Simplify User Journey
+   Priority: high | Effort: high
+   Streamline the path to key actions by reducing steps and cognitive load.
+   Implementation:
+     • Map current user journeys
+     • Identify friction points and drop-off areas
+     • Reduce form fields and required steps
+     • Add progress indicators for multi-step processes
+     • Conduct user testing to validate improvements
+
+
+Viewport: desktop
+Specialty: User Experience & Usability
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MINOR] Information Hierarchy
+   The visual hierarchy could be improved to guide users through key content more effectively.
+
+2. [MINOR] User Flow Analysis
+   Review the primary user journey to ensure logical flow and minimal friction points.
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Enhance Visual Hierarchy
+   Priority: medium | Effort: medium
+   Strengthen the content hierarchy using size, weight, and spacing to guide user attention.
+   Implementation:
+     • Use larger headings for primary content
+     • Increase spacing between sections
+     • Consider F-pattern or Z-pattern layout
+     • Highlight primary call-to-action
+
+2. Simplify User Journey
+   Priority: high | Effort: high
+   Streamline the path to key actions by reducing steps and cognitive load.
+   Implementation:
+     • Map current user journeys
+     • Identify friction points and drop-off areas
+     • Reduce form fields and required steps
+     • Add progress indicators for multi-step processes
+     • Conduct user testing to validate improvements
+
+
+═══════════════════════════════════════════════════════
+TYPOGRAPHY EXPERT AGENT
+═══════════════════════════════════════════════════════
+
+Viewport: mobile
+Specialty: Typography & Readability
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Font Size Analysis
+   Body text should be at least 16px for optimal readability on mobile devices.
+
+2. [MINOR] Line Height
+   Line height (leading) should be between 1.4-1.6 times the font size for comfortable reading.
+
+3. [MAJOR] Typographic Hierarchy
+   Establish clear hierarchy using font size, weight, and spacing to distinguish between headings, subheadings, and body text.
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Optimize Body Text Readability
+   Priority: high | Effort: low
+   Adjust font size, line height, and line length to meet readability best practices.
+   Implementation:
+     • Set minimum font size to 16px
+     • Apply line-height: 1.6 for body text
+     • Limit line length to 45-75 characters
+     • Use comfortable letter-spacing
+
+2. Enhance Typography Hierarchy
+   Priority: high | Effort: medium
+   Create clear visual distinction between heading levels and body text.
+   Implementation:
+     • Use modular scale for heading sizes (e.g., 1.25, 1.5, 2)
+     • Apply font-weight to differentiate importance
+     • Increase spacing above headings
+     • Consider using different font for headings
+     • Maintain consistent hierarchy across all pages
+
+3. Improve Text Contrast
+   Priority: critical | Effort: low
+   Ensure text meets WCAG AA standards with minimum 4.5:1 contrast ratio.
+   Implementation:
+     • Test contrast ratios with accessibility tools
+     • Darken text or lighten backgrounds where needed
+     • Avoid gray text below #767676 on white
+     • Consider different color for links
+
+4. Mobile Typography Optimization
+   Priority: medium | Effort: low
+   Optimize typography specifically for mobile reading experience.
+   Implementation:
+     • Increase font size for small screens if needed
+     • Reduce line length for easier reading
+     • Adjust spacing for touch interfaces
+     • Test readability in various lighting conditions
+
+
+Viewport: tablet
+Specialty: Typography & Readability
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Font Size Analysis
+   Body text should be at least 16px for optimal readability on tablet devices.
+
+2. [MINOR] Line Height
+   Line height (leading) should be between 1.4-1.6 times the font size for comfortable reading.
+
+3. [MAJOR] Typographic Hierarchy
+   Establish clear hierarchy using font size, weight, and spacing to distinguish between headings, subheadings, and body text.
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Optimize Body Text Readability
+   Priority: high | Effort: low
+   Adjust font size, line height, and line length to meet readability best practices.
+   Implementation:
+     • Set minimum font size to 16px
+     • Apply line-height: 1.6 for body text
+     • Limit line length to 45-75 characters
+     • Use comfortable letter-spacing
+
+2. Enhance Typography Hierarchy
+   Priority: high | Effort: medium
+   Create clear visual distinction between heading levels and body text.
+   Implementation:
+     • Use modular scale for heading sizes (e.g., 1.25, 1.5, 2)
+     • Apply font-weight to differentiate importance
+     • Increase spacing above headings
+     • Consider using different font for headings
+     • Maintain consistent hierarchy across all pages
+
+3. Improve Text Contrast
+   Priority: critical | Effort: low
+   Ensure text meets WCAG AA standards with minimum 4.5:1 contrast ratio.
+   Implementation:
+     • Test contrast ratios with accessibility tools
+     • Darken text or lighten backgrounds where needed
+     • Avoid gray text below #767676 on white
+     • Consider different color for links
+
+
+Viewport: desktop
+Specialty: Typography & Readability
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Font Size Analysis
+   Body text should be at least 16px for optimal readability on desktop devices.
+
+2. [MINOR] Line Height
+   Line height (leading) should be between 1.4-1.6 times the font size for comfortable reading.
+
+3. [MAJOR] Typographic Hierarchy
+   Establish clear hierarchy using font size, weight, and spacing to distinguish between headings, subheadings, and body text.
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Optimize Body Text Readability
+   Priority: high | Effort: low
+   Adjust font size, line height, and line length to meet readability best practices.
+   Implementation:
+     • Set minimum font size to 16px
+     • Apply line-height: 1.6 for body text
+     • Limit line length to 45-75 characters
+     • Use comfortable letter-spacing
+
+2. Enhance Typography Hierarchy
+   Priority: high | Effort: medium
+   Create clear visual distinction between heading levels and body text.
+   Implementation:
+     • Use modular scale for heading sizes (e.g., 1.25, 1.5, 2)
+     • Apply font-weight to differentiate importance
+     • Increase spacing above headings
+     • Consider using different font for headings
+     • Maintain consistent hierarchy across all pages
+
+3. Improve Text Contrast
+   Priority: critical | Effort: low
+   Ensure text meets WCAG AA standards with minimum 4.5:1 contrast ratio.
+   Implementation:
+     • Test contrast ratios with accessibility tools
+     • Darken text or lighten backgrounds where needed
+     • Avoid gray text below #767676 on white
+     • Consider different color for links
+
+
+═══════════════════════════════════════════════════════
+INTERACTION DESIGNER AGENT
+═══════════════════════════════════════════════════════
+
+Viewport: mobile
+Specialty: User Interaction & Engagement Patterns
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Touch Target Sizing
+   Interactive elements should be at least 44x44px for comfortable touch interaction
+
+2. [MINOR] Swipe Gestures
+   Limited visual affordances for swipe-based navigation detected
+
+3. [MINOR] Loading States
+   User feedback during async operations improves perceived performance
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Implement Touch-Friendly Controls
+   Priority: high | Effort: medium
+   Ensure all buttons, links, and interactive elements meet minimum touch target size of 44x44px with adequate spacing
+   Implementation:
+     • Audit all clickable elements for minimum size compliance
+     • Add padding around smaller interactive elements
+     • Implement visual feedback for touch interactions (active states)
+     • Test with actual device touch interactions
+
+2. Add Gesture Indicators
+   Priority: medium | Effort: low
+   Include visual cues for swipeable content (dots, arrows, or edge shadows)
+   Implementation:
+     • Add pagination dots for carousels and galleries
+     • Implement subtle edge gradients for horizontal scrollable content
+     • Include left/right arrows for desktop users
+     • Add haptic feedback for native mobile apps
+
+3. Add Loading & Empty States
+   Priority: high | Effort: medium
+   Implement skeleton screens, spinners, and helpful empty state messages
+   Implementation:
+     • Use skeleton screens for content that takes >500ms to load
+     • Add spinner indicators for buttons with async actions
+     • Show progress bars for multi-step processes
+     • Design helpful empty states with clear next actions
+     • Implement optimistic UI updates where appropriate
+
+4. Enhance Button States
+   Priority: medium | Effort: low
+   Clearly communicate all interaction states (default, hover, active, disabled, loading)
+   Implementation:
+     • Design distinct visual states for each interaction phase
+     • Add loading spinners to buttons during async operations
+     • Disable buttons after click to prevent double-submission
+     • Use reduced opacity and cursor: not-allowed for disabled states
+     • Add success/error feedback after form submissions
+
+
+Viewport: tablet
+Specialty: User Interaction & Engagement Patterns
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MINOR] Hover State Ambiguity
+   Tablets support both touch and hover interactions - design should accommodate both
+
+2. [MINOR] Loading States
+   User feedback during async operations improves perceived performance
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Hybrid Interaction Design
+   Priority: medium | Effort: medium
+   Design interactions that work well for both touch and hover-capable input methods
+   Implementation:
+     • Avoid hover-only interactions (use tap/click instead)
+     • Implement visible active states for touch feedback
+     • Make dropdowns work with both tap and hover
+     • Test with iPad + trackpad scenarios
+
+2. Add Loading & Empty States
+   Priority: high | Effort: medium
+   Implement skeleton screens, spinners, and helpful empty state messages
+   Implementation:
+     • Use skeleton screens for content that takes >500ms to load
+     • Add spinner indicators for buttons with async actions
+     • Show progress bars for multi-step processes
+     • Design helpful empty states with clear next actions
+     • Implement optimistic UI updates where appropriate
+
+3. Enhance Button States
+   Priority: medium | Effort: low
+   Clearly communicate all interaction states (default, hover, active, disabled, loading)
+   Implementation:
+     • Design distinct visual states for each interaction phase
+     • Add loading spinners to buttons during async operations
+     • Disable buttons after click to prevent double-submission
+     • Use reduced opacity and cursor: not-allowed for disabled states
+     • Add success/error feedback after form submissions
+
+
+Viewport: desktop
+Specialty: User Interaction & Engagement Patterns
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MINOR] Hover State Design
+   Desktop users expect rich hover feedback for interactive elements
+
+2. [MAJOR] Keyboard Navigation
+   Keyboard accessibility requires proper focus indicators and tab order
+
+3. [MINOR] Loading States
+   User feedback during async operations improves perceived performance
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Enhance Hover Micro-interactions
+   Priority: high | Effort: medium
+   Add smooth transitions, tooltips, and visual feedback for desktop hover states
+   Implementation:
+     • Implement 0.2-0.3s transitions for hover effects
+     • Add cursor: pointer for all clickable elements
+     • Show tooltips on icon-only buttons
+     • Use color shifts or elevation changes for hover feedback
+     • Add subtle scale or lift effects for cards/buttons
+
+2. Implement Keyboard Navigation
+   Priority: high | Effort: medium
+   Ensure complete keyboard accessibility with visible focus indicators
+   Implementation:
+     • Add :focus-visible styles for all interactive elements
+     • Maintain logical tab order (left-to-right, top-to-bottom)
+     • Implement skip-to-content links
+     • Add keyboard shortcuts for common actions
+     • Test navigation with Tab, Shift+Tab, and Arrow keys
+
+3. Add Loading & Empty States
+   Priority: high | Effort: medium
+   Implement skeleton screens, spinners, and helpful empty state messages
+   Implementation:
+     • Use skeleton screens for content that takes >500ms to load
+     • Add spinner indicators for buttons with async actions
+     • Show progress bars for multi-step processes
+     • Design helpful empty states with clear next actions
+     • Implement optimistic UI updates where appropriate
+
+4. Enhance Button States
+   Priority: medium | Effort: low
+   Clearly communicate all interaction states (default, hover, active, disabled, loading)
+   Implementation:
+     • Design distinct visual states for each interaction phase
+     • Add loading spinners to buttons during async operations
+     • Disable buttons after click to prevent double-submission
+     • Use reduced opacity and cursor: not-allowed for disabled states
+     • Add success/error feedback after form submissions
+
+
+═══════════════════════════════════════════════════════
+GRAPHIC DESIGNER AGENT
+═══════════════════════════════════════════════════════
+
+Viewport: mobile
+Specialty: Visual Design & Brand Aesthetics
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Color Palette Consistency
+   A cohesive color system strengthens brand identity and improves usability
+
+2. [MINOR] Color Psychology
+   Strategic color choices influence user perception and emotional response
+
+3. [MAJOR] Visual Hierarchy
+   Clear visual hierarchy guides users through content and actions
+
+4. [MINOR] White Space Usage
+   Strategic white space improves readability and visual breathing room
+
+5. [MAJOR] Image Quality
+   High-quality, purposeful imagery enhances professionalism and engagement
+
+6. [MINOR] Visual Consistency
+   Consistent image style (photography, illustration, icons) strengthens brand
+
+7. [MAJOR] Mobile Visual Simplicity
+   Limited screen space requires focused, minimal visual design
+
+8. [MAJOR] Brand Identity
+   Consistent visual language reinforces brand recognition and trust
+
+9. [MINOR] Visual Polish
+   Subtle details like shadows, borders, and animations elevate perceived quality
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Establish Color System
+   Priority: high | Effort: medium
+   Create a comprehensive, purposeful color palette
+   Implementation:
+     • Define primary, secondary, and accent colors
+     • Create semantic colors (success, warning, error, info)
+     • Use 60-30-10 rule: 60% dominant, 30% secondary, 10% accent
+     • Generate color scales (100-900) for each main color
+     • Document color usage guidelines
+     • Consider color meaning in different cultures
+     • Use color to guide attention, not just decoration
+
+2. Apply Color Psychology
+   Priority: medium | Effort: Blue: trust, professionalism (tech, finance, healthcare),Green: growth, health, eco-friendly (sustainability, wellness),Red: urgency, passion, energy (call-to-action, alerts),Yellow: optimism, attention (warnings, highlights),Purple: creativity, luxury (premium brands),Orange: friendly, energetic (social, entertainment),Use color to create visual hierarchy and focus
+   Use color strategically to evoke appropriate emotions and actions
+
+3. Strengthen Visual Hierarchy
+   Priority: high | Effort: medium
+   Use size, color, contrast, and spacing to guide attention
+   Implementation:
+     • Make primary actions stand out (size, color, placement)
+     • Use consistent heading sizes to show content structure
+     • Apply the F-pattern or Z-pattern for content layout
+     • Increase contrast for important elements
+     • Group related content with proximity and borders
+     • Use visual weight to indicate importance
+     • Test by squinting at design - hierarchy should remain clear
+
+4. Optimize White Space
+   Priority: medium | Effort: Increase line-height for better readability (1.5-1.8 for body text),Add padding around clickable elements,Use margins to separate distinct content sections,Leave generous whitespace around headlines,Avoid cramming too much content in limited space,Use white space to create natural visual flow,Consider different spacing scales for mobile vs desktop
+   Balance content density with breathing room for clarity
+
+5. Implement Image Strategy
+   Priority: high | Effort: medium
+   Use high-quality, relevant imagery that supports content goals
+   Implementation:
+     • Use high-resolution images (2x for retina displays)
+     • Choose authentic photos over generic stock imagery
+     • Apply consistent filters or color grading
+     • Ensure images have clear purpose and context
+     • Optimize image file sizes for web performance
+     • Consider custom illustrations for unique brand identity
+     • Add loading states for images (blur-up, skeleton screens)
+
+6. Establish Icon System
+   Priority: medium | Effort: Use single icon family (outline vs filled, rounded vs sharp),Maintain consistent icon sizes and stroke weights,Ensure icons are recognizable at small sizes,Use icons to support text, not replace it,Consider accessibility (icons need labels),Popular systems: Heroicons, Feather, Material Icons,Create custom icons for unique brand needs
+   Create or adopt a cohesive icon set with consistent style
+
+7. Simplify Mobile Visuals
+   Priority: high | Effort: medium
+   Prioritize clarity and functionality on small screens
+   Implementation:
+     • Reduce visual complexity and decorative elements
+     • Use larger, bolder typography for readability
+     • Increase contrast for outdoor/sunlight viewing
+     • Simplify navigation with clear icons
+     • Use progressive disclosure to reduce clutter
+     • Optimize hero images for mobile aspect ratios
+     • Consider vertical (9:16) composition for mobile
+
+8. Strengthen Brand Consistency
+   Priority: high | Effort: medium
+   Apply cohesive visual identity across all touchpoints
+   Implementation:
+     • Define brand colors, fonts, and visual style
+     • Create style guide or design system documentation
+     • Use consistent button styles, form inputs, and components
+     • Apply brand personality (playful, serious, innovative, traditional)
+     • Ensure logo usage follows brand guidelines
+     • Maintain consistent photography or illustration style
+     • Review all pages for visual consistency
+
+9. Add Visual Refinement
+   Priority: medium | Effort: Use subtle shadows for depth (avoid heavy drop shadows),Add smooth transitions and micro-animations (0.2-0.3s),Apply border-radius consistently (4px, 8px, or 16px),Use gradient overlays on hero images for text readability,Add subtle hover effects for interactive elements,Consider glassmorphism or neumorphism for modern look,Polish loading states and empty states,Test on high-DPI displays for sharp rendering
+   Enhance design with subtle, purposeful details
+
+10. Implement Dark Mode
+   Priority: low | Effort: Use CSS custom properties for theme switching,Design with OLED screens in mind (true black),Reduce contrast slightly in dark mode (avoid pure white text),Test with prefers-color-scheme media query,Adjust shadows and borders for dark backgrounds,Provide manual toggle in addition to system preference,Ensure all UI elements work in both themes
+   Offer dark theme option for user preference and accessibility
+
+
+Viewport: tablet
+Specialty: Visual Design & Brand Aesthetics
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Color Palette Consistency
+   A cohesive color system strengthens brand identity and improves usability
+
+2. [MINOR] Color Psychology
+   Strategic color choices influence user perception and emotional response
+
+3. [MAJOR] Visual Hierarchy
+   Clear visual hierarchy guides users through content and actions
+
+4. [MINOR] White Space Usage
+   Strategic white space improves readability and visual breathing room
+
+5. [MAJOR] Image Quality
+   High-quality, purposeful imagery enhances professionalism and engagement
+
+6. [MINOR] Visual Consistency
+   Consistent image style (photography, illustration, icons) strengthens brand
+
+7. [MAJOR] Brand Identity
+   Consistent visual language reinforces brand recognition and trust
+
+8. [MINOR] Visual Polish
+   Subtle details like shadows, borders, and animations elevate perceived quality
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Establish Color System
+   Priority: high | Effort: medium
+   Create a comprehensive, purposeful color palette
+   Implementation:
+     • Define primary, secondary, and accent colors
+     • Create semantic colors (success, warning, error, info)
+     • Use 60-30-10 rule: 60% dominant, 30% secondary, 10% accent
+     • Generate color scales (100-900) for each main color
+     • Document color usage guidelines
+     • Consider color meaning in different cultures
+     • Use color to guide attention, not just decoration
+
+2. Apply Color Psychology
+   Priority: medium | Effort: Blue: trust, professionalism (tech, finance, healthcare),Green: growth, health, eco-friendly (sustainability, wellness),Red: urgency, passion, energy (call-to-action, alerts),Yellow: optimism, attention (warnings, highlights),Purple: creativity, luxury (premium brands),Orange: friendly, energetic (social, entertainment),Use color to create visual hierarchy and focus
+   Use color strategically to evoke appropriate emotions and actions
+
+3. Strengthen Visual Hierarchy
+   Priority: high | Effort: medium
+   Use size, color, contrast, and spacing to guide attention
+   Implementation:
+     • Make primary actions stand out (size, color, placement)
+     • Use consistent heading sizes to show content structure
+     • Apply the F-pattern or Z-pattern for content layout
+     • Increase contrast for important elements
+     • Group related content with proximity and borders
+     • Use visual weight to indicate importance
+     • Test by squinting at design - hierarchy should remain clear
+
+4. Optimize White Space
+   Priority: medium | Effort: Increase line-height for better readability (1.5-1.8 for body text),Add padding around clickable elements,Use margins to separate distinct content sections,Leave generous whitespace around headlines,Avoid cramming too much content in limited space,Use white space to create natural visual flow,Consider different spacing scales for mobile vs desktop
+   Balance content density with breathing room for clarity
+
+5. Implement Image Strategy
+   Priority: high | Effort: medium
+   Use high-quality, relevant imagery that supports content goals
+   Implementation:
+     • Use high-resolution images (2x for retina displays)
+     • Choose authentic photos over generic stock imagery
+     • Apply consistent filters or color grading
+     • Ensure images have clear purpose and context
+     • Optimize image file sizes for web performance
+     • Consider custom illustrations for unique brand identity
+     • Add loading states for images (blur-up, skeleton screens)
+
+6. Establish Icon System
+   Priority: medium | Effort: Use single icon family (outline vs filled, rounded vs sharp),Maintain consistent icon sizes and stroke weights,Ensure icons are recognizable at small sizes,Use icons to support text, not replace it,Consider accessibility (icons need labels),Popular systems: Heroicons, Feather, Material Icons,Create custom icons for unique brand needs
+   Create or adopt a cohesive icon set with consistent style
+
+7. Strengthen Brand Consistency
+   Priority: high | Effort: medium
+   Apply cohesive visual identity across all touchpoints
+   Implementation:
+     • Define brand colors, fonts, and visual style
+     • Create style guide or design system documentation
+     • Use consistent button styles, form inputs, and components
+     • Apply brand personality (playful, serious, innovative, traditional)
+     • Ensure logo usage follows brand guidelines
+     • Maintain consistent photography or illustration style
+     • Review all pages for visual consistency
+
+8. Add Visual Refinement
+   Priority: medium | Effort: Use subtle shadows for depth (avoid heavy drop shadows),Add smooth transitions and micro-animations (0.2-0.3s),Apply border-radius consistently (4px, 8px, or 16px),Use gradient overlays on hero images for text readability,Add subtle hover effects for interactive elements,Consider glassmorphism or neumorphism for modern look,Polish loading states and empty states,Test on high-DPI displays for sharp rendering
+   Enhance design with subtle, purposeful details
+
+9. Implement Dark Mode
+   Priority: low | Effort: Use CSS custom properties for theme switching,Design with OLED screens in mind (true black),Reduce contrast slightly in dark mode (avoid pure white text),Test with prefers-color-scheme media query,Adjust shadows and borders for dark backgrounds,Provide manual toggle in addition to system preference,Ensure all UI elements work in both themes
+   Offer dark theme option for user preference and accessibility
+
+
+Viewport: desktop
+Specialty: Visual Design & Brand Aesthetics
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Color Palette Consistency
+   A cohesive color system strengthens brand identity and improves usability
+
+2. [MINOR] Color Psychology
+   Strategic color choices influence user perception and emotional response
+
+3. [MAJOR] Visual Hierarchy
+   Clear visual hierarchy guides users through content and actions
+
+4. [MINOR] White Space Usage
+   Strategic white space improves readability and visual breathing room
+
+5. [MAJOR] Image Quality
+   High-quality, purposeful imagery enhances professionalism and engagement
+
+6. [MINOR] Visual Consistency
+   Consistent image style (photography, illustration, icons) strengthens brand
+
+7. [MINOR] Grid System
+   A consistent grid structure creates visual harmony and balance
+
+8. [MAJOR] Brand Identity
+   Consistent visual language reinforces brand recognition and trust
+
+9. [MINOR] Visual Polish
+   Subtle details like shadows, borders, and animations elevate perceived quality
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Establish Color System
+   Priority: high | Effort: medium
+   Create a comprehensive, purposeful color palette
+   Implementation:
+     • Define primary, secondary, and accent colors
+     • Create semantic colors (success, warning, error, info)
+     • Use 60-30-10 rule: 60% dominant, 30% secondary, 10% accent
+     • Generate color scales (100-900) for each main color
+     • Document color usage guidelines
+     • Consider color meaning in different cultures
+     • Use color to guide attention, not just decoration
+
+2. Apply Color Psychology
+   Priority: medium | Effort: Blue: trust, professionalism (tech, finance, healthcare),Green: growth, health, eco-friendly (sustainability, wellness),Red: urgency, passion, energy (call-to-action, alerts),Yellow: optimism, attention (warnings, highlights),Purple: creativity, luxury (premium brands),Orange: friendly, energetic (social, entertainment),Use color to create visual hierarchy and focus
+   Use color strategically to evoke appropriate emotions and actions
+
+3. Strengthen Visual Hierarchy
+   Priority: high | Effort: medium
+   Use size, color, contrast, and spacing to guide attention
+   Implementation:
+     • Make primary actions stand out (size, color, placement)
+     • Use consistent heading sizes to show content structure
+     • Apply the F-pattern or Z-pattern for content layout
+     • Increase contrast for important elements
+     • Group related content with proximity and borders
+     • Use visual weight to indicate importance
+     • Test by squinting at design - hierarchy should remain clear
+
+4. Optimize White Space
+   Priority: medium | Effort: Increase line-height for better readability (1.5-1.8 for body text),Add padding around clickable elements,Use margins to separate distinct content sections,Leave generous whitespace around headlines,Avoid cramming too much content in limited space,Use white space to create natural visual flow,Consider different spacing scales for mobile vs desktop
+   Balance content density with breathing room for clarity
+
+5. Implement Image Strategy
+   Priority: high | Effort: medium
+   Use high-quality, relevant imagery that supports content goals
+   Implementation:
+     • Use high-resolution images (2x for retina displays)
+     • Choose authentic photos over generic stock imagery
+     • Apply consistent filters or color grading
+     • Ensure images have clear purpose and context
+     • Optimize image file sizes for web performance
+     • Consider custom illustrations for unique brand identity
+     • Add loading states for images (blur-up, skeleton screens)
+
+6. Establish Icon System
+   Priority: medium | Effort: Use single icon family (outline vs filled, rounded vs sharp),Maintain consistent icon sizes and stroke weights,Ensure icons are recognizable at small sizes,Use icons to support text, not replace it,Consider accessibility (icons need labels),Popular systems: Heroicons, Feather, Material Icons,Create custom icons for unique brand needs
+   Create or adopt a cohesive icon set with consistent style
+
+7. Implement Grid System
+   Priority: medium | Effort: Use 12-column grid for flexible layouts,Define consistent gutter width (20-30px),Align elements to grid for visual harmony,Use CSS Grid or Flexbox for implementation,Break the grid intentionally for emphasis,Consider asymmetric grids for visual interest,Document grid specifications in design system
+   Use a flexible grid to organize content and maintain alignment
+
+8. Strengthen Brand Consistency
+   Priority: high | Effort: medium
+   Apply cohesive visual identity across all touchpoints
+   Implementation:
+     • Define brand colors, fonts, and visual style
+     • Create style guide or design system documentation
+     • Use consistent button styles, form inputs, and components
+     • Apply brand personality (playful, serious, innovative, traditional)
+     • Ensure logo usage follows brand guidelines
+     • Maintain consistent photography or illustration style
+     • Review all pages for visual consistency
+
+9. Add Visual Refinement
+   Priority: medium | Effort: Use subtle shadows for depth (avoid heavy drop shadows),Add smooth transitions and micro-animations (0.2-0.3s),Apply border-radius consistently (4px, 8px, or 16px),Use gradient overlays on hero images for text readability,Add subtle hover effects for interactive elements,Consider glassmorphism or neumorphism for modern look,Polish loading states and empty states,Test on high-DPI displays for sharp rendering
+   Enhance design with subtle, purposeful details
+
+10. Implement Dark Mode
+   Priority: low | Effort: Use CSS custom properties for theme switching,Design with OLED screens in mind (true black),Reduce contrast slightly in dark mode (avoid pure white text),Test with prefers-color-scheme media query,Adjust shadows and borders for dark backgrounds,Provide manual toggle in addition to system preference,Ensure all UI elements work in both themes
+   Offer dark theme option for user preference and accessibility
+
+
+═══════════════════════════════════════════════════════
+RESPONSIVE DESIGN AGENT
+═══════════════════════════════════════════════════════
+
+Viewport: mobile
+Specialty: Cross-Device & Breakpoint Optimization
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MAJOR] Mobile Layout Optimization
+   Mobile viewports require single-column layouts and optimized touch interactions
+
+2. [CRITICAL] Horizontal Scrolling
+   Content should fit within viewport width without horizontal scrolling
+
+3. [MAJOR] Mobile Performance
+   Mobile devices have limited bandwidth and processing power
+
+4. [MAJOR] Breakpoint Strategy
+   Strategic breakpoints ensure smooth transitions across all device sizes
+
+5. [MINOR] Flexible Units
+   Relative units (rem, em, %, vw/vh) create more adaptable layouts
+
+6. [MAJOR] Touch vs Mouse Interaction
+   Design patterns should accommodate both touch and mouse input
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Implement Mobile-First Design
+   Priority: high | Effort: medium
+   Start with mobile layout and progressively enhance for larger screens
+   Implementation:
+     • Use single-column layout for primary content
+     • Stack navigation items vertically or in hamburger menu
+     • Increase font sizes for better mobile readability (16px minimum)
+     • Optimize images for mobile bandwidth
+     • Use viewport meta tag: width=device-width, initial-scale=1
+     • Test on actual mobile devices, not just desktop browser resize
+
+2. Prevent Horizontal Scrolling
+   Priority: critical | Effort: Set max-width: 100% on images and media,Use CSS breakpoints to adjust layout at narrow widths,Avoid fixed-width containers that exceed viewport,Test with Chrome DevTools mobile viewport,Use overflow-x: hidden carefully (can hide important content),Implement responsive tables (stack or horizontal scroll container)
+   Ensure all content fits within mobile viewport width
+
+3. Optimize Mobile Performance
+   Priority: high | Effort: medium
+   Reduce payload and improve load times for mobile connections
+   Implementation:
+     • Implement responsive images with srcset/sizes
+     • Use modern image formats (WebP, AVIF) with fallbacks
+     • Lazy load below-the-fold images and content
+     • Minimize JavaScript execution on mobile
+     • Use mobile-specific media queries to load smaller assets
+     • Test on 3G connection speeds
+
+4. Implement Strategic Breakpoints
+   Priority: high | Effort: medium
+   Define breakpoints based on content needs, not specific devices
+   Implementation:
+     • Common breakpoints: 640px (mobile), 768px (tablet), 1024px (desktop), 1280px (large)
+     • Test between breakpoints to catch edge cases
+     • Use min-width (mobile-first) rather than max-width
+     • Consider intermediate breakpoints for edge cases
+     • Use em units for media queries (better for text scaling)
+     • Document breakpoint strategy in design system
+
+5. Use Flexible CSS Units
+   Priority: medium | Effort: Use rem for font sizes (scalable, predictable),Use em for spacing relative to font size,Use % for flexible container widths,Use vw/vh for full-viewport elements,Use CSS clamp() for fluid typography,Avoid fixed pixel values for layout containers,Test with browser zoom at 200%
+   Implement relative units for fluid, scalable designs
+
+6. Implement Responsive Images
+   Priority: high | Effort: medium
+   Serve appropriately sized images for each device
+   Implementation:
+     • Use <picture> element for art direction
+     • Implement srcset and sizes attributes
+     • Serve WebP with JPEG/PNG fallback
+     • Use image CDN with automatic resizing
+     • Implement lazy loading for below-fold images
+     • Consider CSS image-set() for background images
+     • Test image quality at different viewport sizes
+
+7. Support Multiple Input Methods
+   Priority: medium | Effort: Use @media (hover: hover) to detect hover-capable devices,Provide tap-friendly alternatives to hover interactions,Size touch targets appropriately (44px minimum),Avoid hover-only critical functionality,Support both click and touch events,Test with touch-enabled laptops and hybrid devices
+   Design flexible interactions that work across input types
+
+
+Viewport: tablet
+Specialty: Cross-Device & Breakpoint Optimization
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MINOR] Tablet Layout Strategy
+   Tablets benefit from hybrid layouts between mobile and desktop
+
+2. [MAJOR] Orientation Changes
+   Tablet users frequently switch between portrait and landscape orientations
+
+3. [MAJOR] Breakpoint Strategy
+   Strategic breakpoints ensure smooth transitions across all device sizes
+
+4. [MINOR] Flexible Units
+   Relative units (rem, em, %, vw/vh) create more adaptable layouts
+
+5. [MAJOR] Touch vs Mouse Interaction
+   Design patterns should accommodate both touch and mouse input
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Optimize Tablet Layout
+   Priority: medium | Effort: Use 2-column layouts where appropriate,Implement collapsible side navigation,Adjust grid systems for tablet breakpoints (768px - 1024px),Consider both touch and pointer interactions,Test both orientations (portrait 768px, landscape 1024px),Use CSS Grid for flexible multi-column layouts
+   Design flexible layouts that work in both portrait and landscape
+
+2. Handle Orientation Changes
+   Priority: medium | Effort: Use CSS orientation media queries (@media orientation: landscape),Reflow content appropriately in each orientation,Maintain scroll position during orientation change,Adjust image aspect ratios for different orientations,Test with iOS Safari and Android Chrome,Ensure fixed elements reposition correctly
+   Ensure smooth transitions between portrait and landscape modes
+
+3. Implement Strategic Breakpoints
+   Priority: high | Effort: medium
+   Define breakpoints based on content needs, not specific devices
+   Implementation:
+     • Common breakpoints: 640px (mobile), 768px (tablet), 1024px (desktop), 1280px (large)
+     • Test between breakpoints to catch edge cases
+     • Use min-width (mobile-first) rather than max-width
+     • Consider intermediate breakpoints for edge cases
+     • Use em units for media queries (better for text scaling)
+     • Document breakpoint strategy in design system
+
+4. Use Flexible CSS Units
+   Priority: medium | Effort: Use rem for font sizes (scalable, predictable),Use em for spacing relative to font size,Use % for flexible container widths,Use vw/vh for full-viewport elements,Use CSS clamp() for fluid typography,Avoid fixed pixel values for layout containers,Test with browser zoom at 200%
+   Implement relative units for fluid, scalable designs
+
+5. Implement Responsive Images
+   Priority: high | Effort: medium
+   Serve appropriately sized images for each device
+   Implementation:
+     • Use <picture> element for art direction
+     • Implement srcset and sizes attributes
+     • Serve WebP with JPEG/PNG fallback
+     • Use image CDN with automatic resizing
+     • Implement lazy loading for below-fold images
+     • Consider CSS image-set() for background images
+     • Test image quality at different viewport sizes
+
+6. Support Multiple Input Methods
+   Priority: medium | Effort: Use @media (hover: hover) to detect hover-capable devices,Provide tap-friendly alternatives to hover interactions,Size touch targets appropriately (44px minimum),Avoid hover-only critical functionality,Support both click and touch events,Test with touch-enabled laptops and hybrid devices
+   Design flexible interactions that work across input types
+
+
+Viewport: desktop
+Specialty: Cross-Device & Breakpoint Optimization
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [MINOR] Large Screen Layout
+   Desktop viewports should use multi-column layouts and maximize screen space
+
+2. [MAJOR] Ultra-Wide Displays
+   Content should not become uncomfortably wide on large monitors
+
+3. [MAJOR] Breakpoint Strategy
+   Strategic breakpoints ensure smooth transitions across all device sizes
+
+4. [MINOR] Flexible Units
+   Relative units (rem, em, %, vw/vh) create more adaptable layouts
+
+5. [MAJOR] Touch vs Mouse Interaction
+   Design patterns should accommodate both touch and mouse input
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Optimize Desktop Layout
+   Priority: medium | Effort: Use multi-column layouts (2-4 columns),Implement sidebar navigation for easy access,Show additional content (related articles, metadata),Use hover states and tooltips for enhanced interactions,Implement keyboard shortcuts for power users,Consider split-screen or dashboard layouts
+   Take advantage of desktop screen real estate while maintaining readability
+
+2. Set Maximum Content Width
+   Priority: high | Effort: medium
+   Constrain content width for comfortable reading on large displays
+   Implementation:
+     • Set max-width on main content area (1200-1440px recommended)
+     • Center content with auto margins
+     • Keep text line length between 50-75 characters
+     • Use wider breakpoints for navigation and backgrounds
+     • Test on 4K displays and ultra-wide monitors
+     • Consider using CSS Container Queries for component-level responsiveness
+
+3. Implement Strategic Breakpoints
+   Priority: high | Effort: medium
+   Define breakpoints based on content needs, not specific devices
+   Implementation:
+     • Common breakpoints: 640px (mobile), 768px (tablet), 1024px (desktop), 1280px (large)
+     • Test between breakpoints to catch edge cases
+     • Use min-width (mobile-first) rather than max-width
+     • Consider intermediate breakpoints for edge cases
+     • Use em units for media queries (better for text scaling)
+     • Document breakpoint strategy in design system
+
+4. Use Flexible CSS Units
+   Priority: medium | Effort: Use rem for font sizes (scalable, predictable),Use em for spacing relative to font size,Use % for flexible container widths,Use vw/vh for full-viewport elements,Use CSS clamp() for fluid typography,Avoid fixed pixel values for layout containers,Test with browser zoom at 200%
+   Implement relative units for fluid, scalable designs
+
+5. Implement Responsive Images
+   Priority: high | Effort: medium
+   Serve appropriately sized images for each device
+   Implementation:
+     • Use <picture> element for art direction
+     • Implement srcset and sizes attributes
+     • Serve WebP with JPEG/PNG fallback
+     • Use image CDN with automatic resizing
+     • Implement lazy loading for below-fold images
+     • Consider CSS image-set() for background images
+     • Test image quality at different viewport sizes
+
+6. Support Multiple Input Methods
+   Priority: medium | Effort: Use @media (hover: hover) to detect hover-capable devices,Provide tap-friendly alternatives to hover interactions,Size touch targets appropriately (44px minimum),Avoid hover-only critical functionality,Support both click and touch events,Test with touch-enabled laptops and hybrid devices
+   Design flexible interactions that work across input types
+
+
+═══════════════════════════════════════════════════════
+ACCESSIBILITY EXPERT AGENT
+═══════════════════════════════════════════════════════
+
+Viewport: mobile
+Specialty: WCAG Compliance & Inclusive Design
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [CRITICAL] Color Contrast Compliance
+   WCAG AA requires 4.5:1 contrast for normal text, 3:1 for large text
+
+2. [MAJOR] Color-Only Information
+   Information should not be conveyed by color alone (affects color-blind users)
+
+3. [MAJOR] Semantic HTML Structure
+   Proper HTML5 semantic elements improve screen reader navigation
+
+4. [CRITICAL] Alternative Text
+   All images need descriptive alt text for screen reader users
+
+5. [MAJOR] Touch Target Size
+   WCAG requires minimum 44x44px touch targets for mobile
+
+6. [MAJOR] Form Accessibility
+   Forms require proper labels, error messaging, and validation feedback
+
+7. [MAJOR] Animation & Motion
+   Respect prefers-reduced-motion for users with vestibular disorders
+
+8. [MAJOR] Text Resizing
+   Content should remain usable at 200% zoom without horizontal scrolling
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Audit Color Contrast Ratios
+   Priority: critical | Effort: Test all text/background combinations with contrast checker tools,Aim for 4.5:1 minimum for normal text (<18pt),Aim for 3:1 minimum for large text (≥18pt or ≥14pt bold),Check contrast for UI controls, buttons, and form inputs,Test in different color modes (light/dark theme),Consider color-blind simulation tools
+   Ensure all text meets WCAG AA standards (AAA preferred for body text)
+
+2. Add Non-Color Indicators
+   Priority: high | Effort: medium
+   Use icons, patterns, or text labels alongside color-coded information
+   Implementation:
+     • Add icons to success/warning/error messages
+     • Use patterns or textures in charts and graphs
+     • Include text labels for status indicators
+     • Add underlines to links (not just color)
+     • Use shapes in addition to colors for data visualization
+
+3. Implement Semantic HTML
+   Priority: high | Effort: medium
+   Use proper HTML5 elements for better accessibility and SEO
+   Implementation:
+     • Use <header>, <nav>, <main>, <article>, <aside>, <footer>
+     • Implement proper heading hierarchy (h1 → h6, no skipping)
+     • Use <button> for clickable actions, <a> for navigation
+     • Add ARIA landmarks for complex layouts
+     • Use <label> elements for all form inputs
+     • Implement proper list structures (<ul>, <ol>) for grouped content
+
+4. Add Descriptive Alt Text
+   Priority: critical | Effort: Write concise, descriptive alt text (avoid "image of"),Use alt="" for purely decorative images,Include text from images in alt attribute,For complex images (charts), provide longer descriptions,Test with screen reader (VoiceOver, NVDA, JAWS),Add aria-label for icon-only buttons
+   Every meaningful image needs alt text; decorative images need alt=""
+
+5. Optimize Touch Targets
+   Priority: high | Effort: medium
+   Ensure all interactive elements are easy to tap on mobile devices
+   Implementation:
+     • Minimum 44x44px (iOS) or 48x48dp (Android) touch targets
+     • Add sufficient spacing between adjacent touch targets
+     • Increase tap area beyond visible button size if needed
+     • Test with various finger sizes and dexterity levels
+     • Avoid placing critical actions at screen edges
+
+6. Enhance Form Accessibility
+   Priority: high | Effort: medium
+   Implement comprehensive accessible form patterns
+   Implementation:
+     • Associate <label> with every form input (for/id matching)
+     • Use placeholder text as hints, not labels
+     • Add aria-required="true" for required fields
+     • Show inline validation with both visual and text feedback
+     • Group related inputs with <fieldset> and <legend>
+     • Display error messages near relevant fields
+     • Use autocomplete attributes for common fields
+     • Announce validation errors to screen readers (aria-live)
+
+7. Implement Reduced Motion Support
+   Priority: high | Effort: medium
+   Provide alternative experiences for users who prefer reduced motion
+   Implementation:
+     • Detect prefers-reduced-motion media query
+     • Disable or reduce non-essential animations
+     • Replace animations with instant transitions or fades
+     • Maintain functionality without relying on animations
+     • Avoid auto-playing videos or carousels
+     • Provide play/pause controls for all motion content
+
+8. Support Text Scaling
+   Priority: medium | Effort: Use relative units (rem, em) instead of pixels for font sizes,Test at 200% browser zoom level,Avoid fixed-height containers for text content,Ensure no horizontal scrolling at increased zoom,Allow text reflow on mobile when zoomed,Test with browser accessibility features enabled
+   Ensure layouts adapt gracefully to increased text sizes
+
+
+Viewport: tablet
+Specialty: WCAG Compliance & Inclusive Design
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [CRITICAL] Color Contrast Compliance
+   WCAG AA requires 4.5:1 contrast for normal text, 3:1 for large text
+
+2. [MAJOR] Color-Only Information
+   Information should not be conveyed by color alone (affects color-blind users)
+
+3. [MAJOR] Semantic HTML Structure
+   Proper HTML5 semantic elements improve screen reader navigation
+
+4. [CRITICAL] Alternative Text
+   All images need descriptive alt text for screen reader users
+
+5. [MAJOR] Form Accessibility
+   Forms require proper labels, error messaging, and validation feedback
+
+6. [MAJOR] Animation & Motion
+   Respect prefers-reduced-motion for users with vestibular disorders
+
+7. [MAJOR] Text Resizing
+   Content should remain usable at 200% zoom without horizontal scrolling
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Audit Color Contrast Ratios
+   Priority: critical | Effort: Test all text/background combinations with contrast checker tools,Aim for 4.5:1 minimum for normal text (<18pt),Aim for 3:1 minimum for large text (≥18pt or ≥14pt bold),Check contrast for UI controls, buttons, and form inputs,Test in different color modes (light/dark theme),Consider color-blind simulation tools
+   Ensure all text meets WCAG AA standards (AAA preferred for body text)
+
+2. Add Non-Color Indicators
+   Priority: high | Effort: medium
+   Use icons, patterns, or text labels alongside color-coded information
+   Implementation:
+     • Add icons to success/warning/error messages
+     • Use patterns or textures in charts and graphs
+     • Include text labels for status indicators
+     • Add underlines to links (not just color)
+     • Use shapes in addition to colors for data visualization
+
+3. Implement Semantic HTML
+   Priority: high | Effort: medium
+   Use proper HTML5 elements for better accessibility and SEO
+   Implementation:
+     • Use <header>, <nav>, <main>, <article>, <aside>, <footer>
+     • Implement proper heading hierarchy (h1 → h6, no skipping)
+     • Use <button> for clickable actions, <a> for navigation
+     • Add ARIA landmarks for complex layouts
+     • Use <label> elements for all form inputs
+     • Implement proper list structures (<ul>, <ol>) for grouped content
+
+4. Add Descriptive Alt Text
+   Priority: critical | Effort: Write concise, descriptive alt text (avoid "image of"),Use alt="" for purely decorative images,Include text from images in alt attribute,For complex images (charts), provide longer descriptions,Test with screen reader (VoiceOver, NVDA, JAWS),Add aria-label for icon-only buttons
+   Every meaningful image needs alt text; decorative images need alt=""
+
+5. Enhance Form Accessibility
+   Priority: high | Effort: medium
+   Implement comprehensive accessible form patterns
+   Implementation:
+     • Associate <label> with every form input (for/id matching)
+     • Use placeholder text as hints, not labels
+     • Add aria-required="true" for required fields
+     • Show inline validation with both visual and text feedback
+     • Group related inputs with <fieldset> and <legend>
+     • Display error messages near relevant fields
+     • Use autocomplete attributes for common fields
+     • Announce validation errors to screen readers (aria-live)
+
+6. Implement Reduced Motion Support
+   Priority: high | Effort: medium
+   Provide alternative experiences for users who prefer reduced motion
+   Implementation:
+     • Detect prefers-reduced-motion media query
+     • Disable or reduce non-essential animations
+     • Replace animations with instant transitions or fades
+     • Maintain functionality without relying on animations
+     • Avoid auto-playing videos or carousels
+     • Provide play/pause controls for all motion content
+
+7. Support Text Scaling
+   Priority: medium | Effort: Use relative units (rem, em) instead of pixels for font sizes,Test at 200% browser zoom level,Avoid fixed-height containers for text content,Ensure no horizontal scrolling at increased zoom,Allow text reflow on mobile when zoomed,Test with browser accessibility features enabled
+   Ensure layouts adapt gracefully to increased text sizes
+
+
+Viewport: desktop
+Specialty: WCAG Compliance & Inclusive Design
+
+📋 FINDINGS:
+───────────────────────────────────────────────────────
+1. [CRITICAL] Color Contrast Compliance
+   WCAG AA requires 4.5:1 contrast for normal text, 3:1 for large text
+
+2. [MAJOR] Color-Only Information
+   Information should not be conveyed by color alone (affects color-blind users)
+
+3. [MAJOR] Semantic HTML Structure
+   Proper HTML5 semantic elements improve screen reader navigation
+
+4. [CRITICAL] Alternative Text
+   All images need descriptive alt text for screen reader users
+
+5. [CRITICAL] Keyboard Navigation
+   All functionality must be accessible via keyboard alone
+
+6. [MAJOR] Form Accessibility
+   Forms require proper labels, error messaging, and validation feedback
+
+7. [MAJOR] Animation & Motion
+   Respect prefers-reduced-motion for users with vestibular disorders
+
+8. [MAJOR] Text Resizing
+   Content should remain usable at 200% zoom without horizontal scrolling
+
+💡 RECOMMENDATIONS:
+───────────────────────────────────────────────────────
+1. Audit Color Contrast Ratios
+   Priority: critical | Effort: Test all text/background combinations with contrast checker tools,Aim for 4.5:1 minimum for normal text (<18pt),Aim for 3:1 minimum for large text (≥18pt or ≥14pt bold),Check contrast for UI controls, buttons, and form inputs,Test in different color modes (light/dark theme),Consider color-blind simulation tools
+   Ensure all text meets WCAG AA standards (AAA preferred for body text)
+
+2. Add Non-Color Indicators
+   Priority: high | Effort: medium
+   Use icons, patterns, or text labels alongside color-coded information
+   Implementation:
+     • Add icons to success/warning/error messages
+     • Use patterns or textures in charts and graphs
+     • Include text labels for status indicators
+     • Add underlines to links (not just color)
+     • Use shapes in addition to colors for data visualization
+
+3. Implement Semantic HTML
+   Priority: high | Effort: medium
+   Use proper HTML5 elements for better accessibility and SEO
+   Implementation:
+     • Use <header>, <nav>, <main>, <article>, <aside>, <footer>
+     • Implement proper heading hierarchy (h1 → h6, no skipping)
+     • Use <button> for clickable actions, <a> for navigation
+     • Add ARIA landmarks for complex layouts
+     • Use <label> elements for all form inputs
+     • Implement proper list structures (<ul>, <ol>) for grouped content
+
+4. Add Descriptive Alt Text
+   Priority: critical | Effort: Write concise, descriptive alt text (avoid "image of"),Use alt="" for purely decorative images,Include text from images in alt attribute,For complex images (charts), provide longer descriptions,Test with screen reader (VoiceOver, NVDA, JAWS),Add aria-label for icon-only buttons
+   Every meaningful image needs alt text; decorative images need alt=""
+
+5. Ensure Full Keyboard Access
+   Priority: critical | Effort: All interactive elements accessible via Tab/Shift+Tab,Visible focus indicators with 3:1 contrast ratio,Logical tab order matching visual layout,Enter/Space activate buttons, Enter submits forms,Escape closes modals/dropdowns,Arrow keys for radio groups and select dropdowns,Skip-to-content link as first focusable element
+   Test and optimize complete keyboard navigation support
+
+6. Enhance Form Accessibility
+   Priority: high | Effort: medium
+   Implement comprehensive accessible form patterns
+   Implementation:
+     • Associate <label> with every form input (for/id matching)
+     • Use placeholder text as hints, not labels
+     • Add aria-required="true" for required fields
+     • Show inline validation with both visual and text feedback
+     • Group related inputs with <fieldset> and <legend>
+     • Display error messages near relevant fields
+     • Use autocomplete attributes for common fields
+     • Announce validation errors to screen readers (aria-live)
+
+7. Implement Reduced Motion Support
+   Priority: high | Effort: medium
+   Provide alternative experiences for users who prefer reduced motion
+   Implementation:
+     • Detect prefers-reduced-motion media query
+     • Disable or reduce non-essential animations
+     • Replace animations with instant transitions or fades
+     • Maintain functionality without relying on animations
+     • Avoid auto-playing videos or carousels
+     • Provide play/pause controls for all motion content
+
+8. Support Text Scaling
+   Priority: medium | Effort: Use relative units (rem, em) instead of pixels for font sizes,Test at 200% browser zoom level,Avoid fixed-height containers for text content,Ensure no horizontal scrolling at increased zoom,Allow text reflow on mobile when zoomed,Test with browser accessibility features enabled
+   Ensure layouts adapt gracefully to increased text sizes
+
+
+═══════════════════════════════════════════════════════
+END OF REPORT
+═══════════════════════════════════════════════════════

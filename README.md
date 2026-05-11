@@ -141,11 +141,3 @@ Reports will be saved to the `reports/` directory and screenshots to the `screen
 ## 🤝 Contributing
 
 We welcome contributions from the design and development community. Whether you're interested in improving our AI agents, adding new analysis capabilities, or enhancing the user interface, your input is valuable.
-
-## 📄 License
-
-*License information will be added upon project completion.*
-
----
-
-*The UX Design Analyzer aims to democratize access to expert design feedback, helping create better user experiences across the web.*

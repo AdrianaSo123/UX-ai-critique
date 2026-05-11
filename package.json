@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "cli": "node analyzer.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --coverage"
   },
   "keywords": [
     "ux",
