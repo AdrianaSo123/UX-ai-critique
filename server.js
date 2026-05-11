@@ -1,7 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
 const UXDesignAnalyzer = require('./src/index');
+const validateUrl = require('./src/validateUrl');
+const logger = require('./src/logger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,19 +29,8 @@ app.get('/', (req, res) => {
 /**
  * Start a new analysis
  */
-app.post('/api/analyze', async (req, res) => {
+app.post('/api/analyze', validateUrl, async (req, res) => {
   const { url } = req.body;
-
-  if (!url) {
-    return res.status(400).json({ error: 'URL is required' });
-  }
-
-  // Validate URL
-  try {
-    new URL(url);
-  } catch (error) {
-    return res.status(400).json({ error: 'Invalid URL format' });
-  }
 
   // Generate job ID
   const jobId = Date.now().toString();
@@ -109,10 +101,10 @@ async function runAnalysis(jobId, url) {
     };
     job.results = report.data;
 
-    console.log(`✅ Analysis completed for job ${jobId}`);
+    logger.info(`Analysis completed for job ${jobId}`);
 
   } catch (error) {
-    console.error(`❌ Analysis failed for job ${jobId}:`, error.message);
+    logger.error(`Analysis failed for job ${jobId}: ${error.message}`);
     job.status = 'failed';
     job.error = error.message;
     job.completedAt = new Date().toISOString();
@@ -128,10 +120,10 @@ app.get('/api/health', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log('\n========================================');
-  console.log('🚀 UX DESIGN ANALYZER - WEB INTERFACE');
-  console.log('========================================\n');
-  console.log(`Server running at: http://localhost:${PORT}`);
-  console.log(`\nOpen your browser and visit: http://localhost:${PORT}\n`);
-  console.log('========================================\n');
+  logger.info('========================================');
+  logger.info('🚀 UX DESIGN ANALYZER - WEB INTERFACE');
+  logger.info('========================================');
+  logger.info(`Server running at: http://localhost:${PORT}`);
+  logger.info(`Open your browser and visit: http://localhost:${PORT}`);
+  logger.info('========================================');
 });
