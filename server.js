@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { randomUUID } = require('crypto');
 require('dotenv').config();
 const UXDesignAnalyzer = require('./src/index');
 const validateUrl = require('./src/validateUrl');
 const logger = require('./src/logger');
 const pathModule = require('path');
+const { createJobStore, safeStructuredClone } = require('./src/jobStore');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,7 +27,17 @@ app.use('/screenshots', express.static('screenshots'));
 app.use('/reports', express.static('reports'));
 
 // Store analysis jobs (in production, use a database)
-const jobs = new Map();
+const jobStore = createJobStore({
+  mode: process.env.JOB_STORE || 'memory',
+  filePath: process.env.JOB_STORE_FILE || path.join(__dirname, 'data', 'jobs.json'),
+  logger,
+});
+
+function getLocalReportJsonPath(publicReportPath) {
+  const publicPath = String(publicReportPath || '');
+  const filename = pathModule.basename(publicPath);
+  return path.join(__dirname, 'reports', filename);
+}
 
 function withTimeout(promise, timeoutMs, label) {
   const ms = Number(timeoutMs);
@@ -59,10 +71,12 @@ app.post('/api/analyze', validateUrl, async (req, res) => {
   const { url } = req.body;
 
   // Generate job ID
-  const jobId = Date.now().toString();
+  const jobId = typeof randomUUID === 'function'
+    ? randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   
   // Store job info
-  jobs.set(jobId, {
+  jobStore.set(jobId, {
     id: jobId,
     url,
     status: 'pending',
@@ -85,20 +99,46 @@ app.post('/api/analyze', validateUrl, async (req, res) => {
  */
 app.get('/api/analyze/:jobId', (req, res) => {
   const { jobId } = req.params;
-  const job = jobs.get(jobId);
+  const job = jobStore.get(jobId);
 
   if (!job) {
     return res.status(404).json({ error: 'Job not found' });
   }
 
-  res.json(job);
+  const responseJob = safeStructuredClone(job);
+
+  // If the server restarted, the job may have been reloaded without in-memory results.
+  // Hydrate results from the saved report JSON (if available) so the UI can still render.
+  if (responseJob.status === 'completed' && !responseJob.results && responseJob.report?.path) {
+    const localReportPath = getLocalReportJsonPath(responseJob.report.path);
+    require('fs').promises
+      .readFile(localReportPath, 'utf8')
+      .then(raw => {
+        const reportData = JSON.parse(raw);
+        responseJob.results = reportData;
+        if (!responseJob.report.summary && reportData?.summary) {
+          responseJob.report.summary = reportData.summary;
+        }
+        if (!responseJob.report.screenshots && reportData?.screenshots) {
+          responseJob.report.screenshots = reportData.screenshots;
+        }
+        res.json(responseJob);
+      })
+      .catch(() => {
+        // If hydration fails, still return job metadata.
+        res.json(responseJob);
+      });
+    return;
+  }
+
+  res.json(responseJob);
 });
 
 /**
  * Get list of all analyses
  */
 app.get('/api/analyses', (req, res) => {
-  const allJobs = Array.from(jobs.values())
+  const allJobs = Array.from(jobStore.values())
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 50); // Return last 50 jobs
 
@@ -109,11 +149,13 @@ app.get('/api/analyses', (req, res) => {
  * Run analysis asynchronously
  */
 async function runAnalysis(jobId, url) {
-  const job = jobs.get(jobId);
+  const job = jobStore.get(jobId);
+  if (!job) return;
   job.status = 'running';
   job.startedAt = new Date().toISOString();
   job.progress = 0;
   job.step = 'Starting...';
+  jobStore.schedulePersist();
 
   try {
     const analyzer = new UXDesignAnalyzer();
@@ -123,6 +165,7 @@ async function runAnalysis(jobId, url) {
         if (typeof payload.progress === 'number') job.progress = payload.progress;
         if (payload.message) job.step = payload.message;
         job.updatedAt = new Date().toISOString();
+        jobStore.schedulePersist();
       },
     });
     // Prevent unhandled rejections if a timeout wins the race.
@@ -146,7 +189,11 @@ async function runAnalysis(jobId, url) {
       summary: report.data.summary,
       screenshots: report.data.screenshots,
     };
-    job.results = report.data;
+    // Do not store full results in the job store; they are already written to /reports.
+    // The GET endpoint hydrates results from the saved report JSON when needed.
+    delete job.results;
+
+    jobStore.schedulePersist();
 
     logger.info(`Analysis completed for job ${jobId}`);
 
@@ -157,6 +204,7 @@ async function runAnalysis(jobId, url) {
     job.error = error.message;
     job.completedAt = new Date().toISOString();
     job.updatedAt = new Date().toISOString();
+    jobStore.schedulePersist();
   }
 }
 
@@ -177,12 +225,20 @@ app.get('/api/config', (req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  logger.info('========================================');
-  logger.info('🚀 UX DESIGN ANALYZER - WEB INTERFACE');
-  logger.info('========================================');
-  logger.info(`Server running at: http://localhost:${PORT}`);
-  logger.info(`Open your browser and visit: http://localhost:${PORT}`);
-  logger.info('========================================');
-});
+// Start server (after loading persisted jobs, if enabled)
+(async () => {
+  try {
+    await jobStore.load();
+  } catch (error) {
+    logger.warn(`Job store load failed: ${error.message}`);
+  }
+
+  app.listen(PORT, () => {
+    logger.info('========================================');
+    logger.info('🚀 UX DESIGN ANALYZER - WEB INTERFACE');
+    logger.info('========================================');
+    logger.info(`Server running at: http://localhost:${PORT}`);
+    logger.info(`Open your browser and visit: http://localhost:${PORT}`);
+    logger.info('========================================');
+  });
+})();
