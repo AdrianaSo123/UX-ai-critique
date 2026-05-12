@@ -112,10 +112,19 @@ async function runAnalysis(jobId, url) {
   const job = jobs.get(jobId);
   job.status = 'running';
   job.startedAt = new Date().toISOString();
+  job.progress = 0;
+  job.step = 'Starting...';
 
   try {
     const analyzer = new UXDesignAnalyzer();
-    const analysisPromise = analyzer.analyzeWebsite(url);
+    const analysisPromise = analyzer.analyzeWebsite(url, {
+      onProgress: payload => {
+        if (!payload) return;
+        if (typeof payload.progress === 'number') job.progress = payload.progress;
+        if (payload.message) job.step = payload.message;
+        job.updatedAt = new Date().toISOString();
+      },
+    });
     // Prevent unhandled rejections if a timeout wins the race.
     analysisPromise.catch(() => {});
 
@@ -125,6 +134,9 @@ async function runAnalysis(jobId, url) {
     // Update job with results
     job.status = 'completed';
     job.completedAt = new Date().toISOString();
+    job.progress = 100;
+    job.step = 'Analysis complete.';
+    job.updatedAt = new Date().toISOString();
 
     const reportFilename = pathModule.basename(report.path);
     const textFilename = pathModule.basename(report.textPath);
@@ -141,8 +153,10 @@ async function runAnalysis(jobId, url) {
   } catch (error) {
     logger.error(`Analysis failed for job ${jobId}: ${error.message}`);
     job.status = 'failed';
+    job.step = 'Analysis failed.';
     job.error = error.message;
     job.completedAt = new Date().toISOString();
+    job.updatedAt = new Date().toISOString();
   }
 }
 

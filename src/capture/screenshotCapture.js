@@ -47,6 +47,8 @@ class ScreenshotCapture {
       await this.initialize();
     }
 
+    const onProgress = typeof options.onProgress === 'function' ? options.onProgress : null;
+
     const timestamp = Date.now();
     const screenshots = {};
 
@@ -64,6 +66,13 @@ class ScreenshotCapture {
       for (const [device, viewport] of Object.entries(this.viewports)) {
         let context;
         try {
+          if (onProgress) {
+            try {
+              onProgress({ step: 'screenshot', message: `Capturing ${device} screenshot...` });
+            } catch {
+              // ignore
+            }
+          }
           context = await this.browser.newContext({
             viewport: { width: viewport.width, height: viewport.height },
             userAgent: this.getUserAgent(device),
@@ -105,6 +114,13 @@ class ScreenshotCapture {
           console.log(`✓ Captured ${device} view (${viewport.width}x${viewport.height})`);
         } catch (error) {
           console.log(`⚠️  Skipping ${device} screenshot due to error: ${error.message}`);
+          if (onProgress) {
+            try {
+              onProgress({ step: 'screenshot', message: `Skipping ${device} screenshot (error)` });
+            } catch {
+              // ignore
+            }
+          }
         } finally {
           if (context) {
             try {

@@ -5,7 +5,7 @@ const InteractionDesignerAgent = require('./agents/InteractionDesignerAgent');
 const GraphicDesignerAgent = require('./agents/GraphicDesignerAgent');
 const ResponsiveDesignAgent = require('./agents/ResponsiveDesignAgent');
 const AccessibilityExpertAgent = require('./agents/AccessibilityExpertAgent');
-const { closeSharedBrowser } = require('./agents/playwrightUtil');
+const { closeSharedBrowser, withPage } = require('./agents/playwrightUtil');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -39,6 +39,7 @@ class UXDesignAnalyzer {
     console.log(`Target URL: ${url}\n`);
 
     const agentTimeoutMs = Number(options.agentTimeoutMs || process.env.AGENT_TIMEOUT_MS || 90000);
+    const onProgress = typeof options.onProgress === 'function' ? options.onProgress : null;
 
     function withTimeout(promise, timeoutMs, label) {
       const ms = Number(timeoutMs);
@@ -64,21 +65,47 @@ class UXDesignAnalyzer {
       }
     }
 
+    function emitProgress(payload) {
+      if (!onProgress) return;
+      try {
+        onProgress(payload);
+      } catch {
+        // never fail the analysis due to progress callbacks
+      }
+    }
+
     try {
       // Step 1: Capture screenshots
       console.log('📸 Step 1: Capturing Screenshots...');
       console.log('─────────────────────────────────────');
+      emitProgress({ step: 'screenshots', message: 'Capturing screenshots...', progress: 0 });
       const screenshots = await this.capture.captureWebsite(url, options);
+
+      const totalSteps = 2 + (Object.keys(screenshots).length * this.agents.length);
+      const progressState = { completed: 1, total: totalSteps };
+      emitProgress({
+        step: 'analysis',
+        message: `Screenshots captured (${Object.keys(screenshots).length} viewport${Object.keys(screenshots).length === 1 ? '' : 's'})`,
+        progress: Math.round((progressState.completed / progressState.total) * 100),
+      });
 
       // Step 2: Run agent analysis
       console.log('🤖 Step 2: Running Agent Analysis...');
       console.log('─────────────────────────────────────');
-      const analysis = await this.runAgentAnalysis(screenshots, url, { agentTimeoutMs });
+      const analysis = await this.runAgentAnalysis(screenshots, url, {
+        agentTimeoutMs,
+        progressState,
+        emitProgress,
+      });
 
       // Step 3: Generate comprehensive report
       console.log('📊 Step 3: Generating Report...');
       console.log('─────────────────────────────────────');
+      emitProgress({ step: 'report', message: 'Generating report...', progress: Math.round((progressState.completed / progressState.total) * 100) });
       const report = await this.generateReport(url, screenshots, analysis);
+
+      progressState.completed = progressState.total;
+      emitProgress({ step: 'done', message: 'Finalizing...', progress: 100 });
 
       console.log('\n✅ Analysis Complete!\n');
       console.log(`📁 Report saved to: ${report.path}\n`);
@@ -107,6 +134,8 @@ class UXDesignAnalyzer {
     };
 
     const agentTimeoutMs = Number(options.agentTimeoutMs || 90000);
+    const progressState = options.progressState;
+    const emitProgress = typeof options.emitProgress === 'function' ? options.emitProgress : null;
 
     function withTimeout(promise, timeoutMs, label) {
       const ms = Number(timeoutMs);
@@ -129,24 +158,62 @@ class UXDesignAnalyzer {
       console.log(`\nAnalyzing ${device} view...`);
       results.byViewport[device] = [];
 
-      // Run each agent on this screenshot
-      for (const agent of this.agents) {
-        const agentResult = await withTimeout(
-          agent.analyze(screenshot, url),
-          agentTimeoutMs,
-          `${agent.name} (${device})`
-        );
-        results.byViewport[device].push(agentResult);
-
-        // Also organize by agent
-        if (!results.byAgent[agent.name]) {
-          results.byAgent[agent.name] = [];
-        }
-        results.byAgent[agent.name].push({
-          viewport: device,
-          ...agentResult,
+      if (emitProgress) {
+        emitProgress({
+          step: 'navigate',
+          message: `Loading ${device} viewport...`,
+          progress: progressState ? Math.round((progressState.completed / progressState.total) * 100) : undefined,
         });
       }
+
+      // Navigate once per viewport, run all agents on the same page.
+      await withPage(
+        {
+          url,
+          viewport: screenshot.viewport,
+          viewportName: screenshot.viewport.name,
+        },
+        async page => {
+          for (const agent of this.agents) {
+            if (emitProgress) {
+              emitProgress({
+                step: 'agent',
+                message: `${agent.name}: analyzing ${device}...`,
+                progress: progressState ? Math.round((progressState.completed / progressState.total) * 100) : undefined,
+              });
+            }
+
+            let agentResult;
+            try {
+              if (typeof agent.analyzePage !== 'function') {
+                throw new Error(`${agent.name} does not implement analyzePage()`);
+              }
+              agentResult = await withTimeout(
+                agent.analyzePage(page, screenshot, url),
+                agentTimeoutMs,
+                `${agent.name} (${device})`
+              );
+            } catch (error) {
+              agentResult = agent.generateReport([], []);
+              agentResult.error = error.message;
+            } finally {
+              if (progressState) {
+                progressState.completed = Math.min(progressState.total, (progressState.completed || 0) + 1);
+              }
+            }
+
+            results.byViewport[device].push(agentResult);
+
+            if (!results.byAgent[agent.name]) {
+              results.byAgent[agent.name] = [];
+            }
+            results.byAgent[agent.name].push({
+              viewport: device,
+              ...agentResult,
+            });
+          }
+        }
+      );
     }
 
     console.log('\n✓ All agents completed analysis');

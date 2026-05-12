@@ -568,7 +568,9 @@
                     })
                     .then(data => {
                         if (data.status === 'running') {
-                            showStatus('running', 'Analysis in progress... (this can take a few minutes)');
+                            const pct = (typeof data.progress === 'number' && Number.isFinite(data.progress)) ? ` (${data.progress}%)` : '';
+                            const msg = data.step ? `${data.step}${pct}` : `Analysis in progress... (this can take a few minutes)${pct}`;
+                            showStatus('running', msg);
                             return;
                         }
                         if (data.status === 'completed') {
