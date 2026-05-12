@@ -7,10 +7,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV SKIP_PLAYWRIGHT_INSTALL=1
 
-COPY package.json package-lock.json ./
+COPY package.json ./
 
 # Install production dependencies
-RUN npm ci --omit=dev
+RUN npm install --omit=dev --no-audit --no-fund
 
 COPY . .
 
