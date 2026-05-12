@@ -118,6 +118,22 @@ npm install
 npx playwright install chromium
 ```
 
+## 🚀 Deploy (Render)
+
+### Easiest / most reliable: Docker (one site)
+
+Render's Node environment does not reliably allow installing OS packages during build, which Playwright needs on Linux.
+This repo includes a `Dockerfile` based on the official Playwright image so system dependencies are already present.
+
+On Render:
+- Create a **New Web Service**
+- Choose **Runtime: Docker**
+- No Build Command needed (Docker build handles it)
+- Start Command not needed (Docker CMD runs `npm start`)
+
+After deploy:
+- Open `https://<your-service>.onrender.com/api/health` to confirm it is running.
+
 ### Playwright system dependencies (Linux)
 
 If you see an error like `libglib-2.0.so.0: cannot open shared object file`, your OS image is missing required libraries.
