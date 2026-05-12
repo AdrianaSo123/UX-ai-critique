@@ -8,6 +8,7 @@ ENV NODE_ENV=production
 ENV SKIP_PLAYWRIGHT_INSTALL=1
 
 COPY package.json ./
+COPY scripts/postinstall.js ./scripts/postinstall.js
 
 # Install production dependencies
 RUN npm install --omit=dev --no-audit --no-fund
