@@ -113,6 +113,7 @@ class UXDesignAnalyzer {
    */
   async generateReport(url, screenshots, analysis) {
     const timestamp = Date.now();
+    await fs.mkdir(this.reportsDir, { recursive: true });
     const reportData = {
       url,
       timestamp: new Date().toISOString(),

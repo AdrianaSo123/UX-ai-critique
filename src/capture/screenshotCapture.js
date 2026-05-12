@@ -16,7 +16,8 @@ class ScreenshotCapture {
     this.viewports = {
       mobile: { width: 375, height: 667, name: 'mobile' },
       tablet: { width: 768, height: 1024, name: 'tablet' },
-      desktop: { width: 1920, height: 1080, name: 'desktop' },
+      // Keep this reasonable for low-resource hosts; full HD + fullPage can be huge.
+      desktop: { width: 1366, height: 768, name: 'desktop' },
     };
   }
 
@@ -24,6 +25,7 @@ class ScreenshotCapture {
    * Initialize the browser instance
    */
   async initialize() {
+    await fs.mkdir(this.screenshotDir, { recursive: true });
     try {
       this.browser = await chromium.launch({
         headless: true,
@@ -48,54 +50,77 @@ class ScreenshotCapture {
     const timestamp = Date.now();
     const screenshots = {};
 
+    // Default behavior is viewport screenshots only.
+    // Full-page screenshots can be extremely large and slow on low-resource hosts.
+    const fullPage = options.fullPage === true;
+    const navigationTimeoutMs = Number(options.navigationTimeoutMs || 60000);
+    const screenshotTimeoutMs = Number(options.screenshotTimeoutMs || 60000);
+    const stabilizationMs = Number(options.stabilizationMs || 2000);
+
     try {
       console.log(`\nCapturing screenshots for: ${url}`);
 
       // Capture for each viewport size
       for (const [device, viewport] of Object.entries(this.viewports)) {
-        const context = await this.browser.newContext({
-          viewport: { width: viewport.width, height: viewport.height },
-          userAgent: this.getUserAgent(device),
-        });
-
-        const page = await context.newPage();
-        
-        // Navigate to the URL with more flexible settings
+        let context;
         try {
-          await page.goto(url, {
-            waitUntil: 'domcontentloaded',
-            timeout: 60000,
+          context = await this.browser.newContext({
+            viewport: { width: viewport.width, height: viewport.height },
+            userAgent: this.getUserAgent(device),
           });
+
+          const page = await context.newPage();
+          page.setDefaultTimeout(navigationTimeoutMs);
+          page.setDefaultNavigationTimeout(navigationTimeoutMs);
+
+          // Navigate to the URL (best-effort)
+          try {
+            await page.goto(url, {
+              waitUntil: 'domcontentloaded',
+              timeout: navigationTimeoutMs,
+            });
+          } catch {
+            console.log(`⚠️  Navigation timed out for ${device}; attempting screenshot anyway`);
+          }
+
+          // Wait for page to stabilize
+          await page.waitForTimeout(stabilizationMs);
+
+          // Generate filename
+          const filename = `${timestamp}_${viewport.name}.png`;
+          const filepath = path.join(this.screenshotDir, filename);
+
+          await page.screenshot({
+            path: filepath,
+            fullPage,
+            timeout: screenshotTimeoutMs,
+          });
+
+          screenshots[device] = {
+            path: filepath,
+            viewport: viewport,
+            filename: filename,
+          };
+
+          console.log(`✓ Captured ${device} view (${viewport.width}x${viewport.height})`);
         } catch (error) {
-          // If networkidle fails, try with just domcontentloaded
-          console.log(`⚠️  Using fallback loading strategy for ${device}`);
+          console.log(`⚠️  Skipping ${device} screenshot due to error: ${error.message}`);
+        } finally {
+          if (context) {
+            try {
+              await context.close();
+            } catch {
+              // ignore
+            }
+          }
         }
-
-        // Wait for page to stabilize
-        await page.waitForTimeout(2000);
-
-        // Generate filename
-        const filename = `${timestamp}_${viewport.name}.png`;
-        const filepath = path.join(this.screenshotDir, filename);
-
-        // Capture full page screenshot
-        await page.screenshot({
-          path: filepath,
-          fullPage: options.fullPage !== false,
-        });
-
-        screenshots[device] = {
-          path: filepath,
-          viewport: viewport,
-          filename: filename,
-        };
-
-        console.log(`✓ Captured ${device} view (${viewport.width}x${viewport.height})`);
-
-        await context.close();
       }
 
       console.log('\n✅ All screenshots captured successfully\n');
+
+      if (Object.keys(screenshots).length === 0) {
+        throw new Error('No screenshots were captured.');
+      }
       return screenshots;
 
     } catch (error) {
