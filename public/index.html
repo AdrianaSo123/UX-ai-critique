@@ -559,20 +559,41 @@
         function pollStatus() {
             pollInterval = setInterval(() => {
                 apiFetch(`/api/analyze/${currentJobId}`)
-                    .then(response => response.json())
+                    .then(async response => {
+                        if (!response.ok) {
+                            const text = await response.text().catch(() => '');
+                            throw new Error(`Status ${response.status}. ${text}`.trim());
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.status === 'running') {
-                            showStatus('running', 'Analysis in progress...');
-                        } else if (data.status === 'completed') {
+                            showStatus('running', 'Analysis in progress... (this can take a few minutes)');
+                            return;
+                        }
+                        if (data.status === 'completed') {
                             clearInterval(pollInterval);
                             showStatus('completed', 'Analysis completed');
                             displayResults(data);
                             resetButtonsAfterRun();
-                        } else if (data.status === 'failed') {
+                            return;
+                        }
+                        if (data.status === 'failed') {
+                            clearInterval(pollInterval);
+                            showStatus('failed', `Failed: ${data.error}`);
+                            resetButtonsAfterRun();
+                            return;
+                        }
+                        if (data.error && !data.status) {
                             clearInterval(pollInterval);
                             showStatus('failed', `Failed: ${data.error}`);
                             resetButtonsAfterRun();
                         }
+                    })
+                    .catch(err => {
+                        clearInterval(pollInterval);
+                        showStatus('failed', `Failed: Lost job status (server may have restarted). ${err.message}`);
+                        resetButtonsAfterRun();
                     });
             }, 2000);
         }
