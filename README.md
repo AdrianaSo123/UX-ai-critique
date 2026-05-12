@@ -113,8 +113,17 @@ cd ux-design-analyzer
 # Install dependencies
 npm install
 
-# Install Playwright browsers
-npx playwright install
+# (Playwright browsers are installed automatically via postinstall.)
+# If you see a Playwright “Executable doesn't exist” error, run:
+npx playwright install chromium
+```
+
+### Playwright system dependencies (Linux)
+
+If you see an error like `libglib-2.0.so.0: cannot open shared object file`, your OS image is missing required libraries.
+
+```bash
+npx playwright install --with-deps chromium
 ```
 
 ### Usage
@@ -141,7 +150,7 @@ The web interface allows you to:
 For quick command-line analysis:
 
 ```bash
-npm run cli https://example.com
+npm run cli -- https://example.com
 ```
 
 Reports will be saved to the `reports/` directory and screenshots to the `screenshots/` directory.

@@ -1,7 +1,7 @@
-process.env.PLAYWRIGHT_BROWSERS_PATH = process.env.PLAYWRIGHT_BROWSERS_PATH || '0';
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs').promises;
+const { formatPlaywrightLaunchError } = require('../playwrightError');
 
 /**
  * ScreenshotCapture - Captures website screenshots at various viewport sizes
@@ -24,10 +24,14 @@ class ScreenshotCapture {
    * Initialize the browser instance
    */
   async initialize() {
-    this.browser = await chromium.launch({
-      headless: true,
-    });
-    console.log('Browser initialized successfully');
+    try {
+      this.browser = await chromium.launch({
+        headless: true,
+      });
+      console.log('Browser initialized successfully');
+    } catch (error) {
+      throw new Error(formatPlaywrightLaunchError(error), { cause: error });
+    }
   }
 
   /**

@@ -1,5 +1,5 @@
-process.env.PLAYWRIGHT_BROWSERS_PATH = process.env.PLAYWRIGHT_BROWSERS_PATH || '0';
 const { chromium } = require('playwright');
+const { formatPlaywrightLaunchError } = require('../playwrightError');
 
 let browserPromise = null;
 let activeContexts = 0;
@@ -8,7 +8,10 @@ let closeInProgress = null;
 
 async function getBrowser() {
   if (!browserPromise) {
-    browserPromise = chromium.launch({ headless: true });
+    browserPromise = chromium.launch({ headless: true }).catch(error => {
+      browserPromise = null;
+      throw new Error(formatPlaywrightLaunchError(error), { cause: error });
+    });
   }
   return browserPromise;
 }

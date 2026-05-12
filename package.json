@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "cli": "node analyzer.js",
-    "postinstall": "PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install --with-deps chromium",
+    "postinstall": "node scripts/postinstall.js",
     "test": "jest --coverage"
   },
   "keywords": [
@@ -21,6 +21,9 @@
   ],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",

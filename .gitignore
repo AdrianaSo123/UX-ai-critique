@@ -11,6 +11,7 @@ screenshots/*.png
 screenshots/*.jpg
 reports/*.html
 reports/*.json
+reports/*.txt
 reports/*.pdf
 
 # Keep directory structure but ignore contents
