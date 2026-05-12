@@ -6,6 +6,7 @@ WORKDIR /app
 # The base image already includes browsers + system dependencies.
 ENV NODE_ENV=production
 ENV SKIP_PLAYWRIGHT_INSTALL=1
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 COPY package.json ./
 COPY scripts/postinstall.js ./scripts/postinstall.js
