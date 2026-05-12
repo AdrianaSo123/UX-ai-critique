@@ -38,6 +38,32 @@ class UXDesignAnalyzer {
     console.log('========================================\n');
     console.log(`Target URL: ${url}\n`);
 
+    const agentTimeoutMs = Number(options.agentTimeoutMs || process.env.AGENT_TIMEOUT_MS || 90000);
+
+    function withTimeout(promise, timeoutMs, label) {
+      const ms = Number(timeoutMs);
+      if (!Number.isFinite(ms) || ms <= 0) return promise;
+
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          const timer = setTimeout(() => {
+            const message = label ? `${label} timed out after ${ms}ms` : `Timed out after ${ms}ms`;
+            reject(new Error(message));
+          }, ms);
+          if (typeof timer.unref === 'function') timer.unref();
+        }),
+      ]);
+    }
+
+    async function bestEffort(promise, timeoutMs) {
+      try {
+        await withTimeout(promise, timeoutMs, 'Cleanup');
+      } catch {
+        // Best-effort cleanup; never block completion.
+      }
+    }
+
     try {
       // Step 1: Capture screenshots
       console.log('📸 Step 1: Capturing Screenshots...');
@@ -47,7 +73,7 @@ class UXDesignAnalyzer {
       // Step 2: Run agent analysis
       console.log('🤖 Step 2: Running Agent Analysis...');
       console.log('─────────────────────────────────────');
-      const analysis = await this.runAgentAnalysis(screenshots, url);
+      const analysis = await this.runAgentAnalysis(screenshots, url, { agentTimeoutMs });
 
       // Step 3: Generate comprehensive report
       console.log('📊 Step 3: Generating Report...');
@@ -64,8 +90,8 @@ class UXDesignAnalyzer {
       console.error('❌ Analysis failed:', error.message);
       throw error;
     } finally {
-      await this.capture.close();
-      await closeSharedBrowser();
+      await bestEffort(this.capture.close(), 10000);
+      await bestEffort(closeSharedBrowser(), 10000);
     }
   }
 
@@ -74,11 +100,29 @@ class UXDesignAnalyzer {
    * @param {Object} screenshots - Screenshot data from capture
    * @param {string} url - Original URL
    */
-  async runAgentAnalysis(screenshots, url) {
+  async runAgentAnalysis(screenshots, url, options = {}) {
     const results = {
       byViewport: {},
       byAgent: {},
     };
+
+    const agentTimeoutMs = Number(options.agentTimeoutMs || 90000);
+
+    function withTimeout(promise, timeoutMs, label) {
+      const ms = Number(timeoutMs);
+      if (!Number.isFinite(ms) || ms <= 0) return promise;
+
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          const timer = setTimeout(() => {
+            const message = label ? `${label} timed out after ${ms}ms` : `Timed out after ${ms}ms`;
+            reject(new Error(message));
+          }, ms);
+          if (typeof timer.unref === 'function') timer.unref();
+        }),
+      ]);
+    }
 
     // Analyze each viewport
     for (const [device, screenshot] of Object.entries(screenshots)) {
@@ -87,7 +131,11 @@ class UXDesignAnalyzer {
 
       // Run each agent on this screenshot
       for (const agent of this.agents) {
-        const agentResult = await agent.analyze(screenshot, url);
+        const agentResult = await withTimeout(
+          agent.analyze(screenshot, url),
+          agentTimeoutMs,
+          `${agent.name} (${device})`
+        );
         results.byViewport[device].push(agentResult);
 
         // Also organize by agent

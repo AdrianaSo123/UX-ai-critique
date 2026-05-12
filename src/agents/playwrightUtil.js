@@ -28,7 +28,10 @@ async function closeBrowserIfIdle() {
   closeInProgress = (async () => {
     try {
       const browser = await browserPromise;
-      await browser.close();
+      await Promise.race([
+        browser.close(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('browser.close timeout')), 10000)),
+      ]);
     } catch {
       // Best-effort shutdown; browser may already be closed.
     } finally {

@@ -27,6 +27,23 @@ app.use('/reports', express.static('reports'));
 // Store analysis jobs (in production, use a database)
 const jobs = new Map();
 
+function withTimeout(promise, timeoutMs, label) {
+  const ms = Number(timeoutMs);
+  if (!Number.isFinite(ms) || ms <= 0) return promise;
+
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      const timer = setTimeout(() => {
+        const message = label ? `${label} timed out after ${ms}ms` : `Timed out after ${ms}ms`;
+        reject(new Error(message));
+      }, ms);
+      // Avoid keeping the event loop alive for long timeouts.
+      if (typeof timer.unref === 'function') timer.unref();
+    }),
+  ]);
+}
+
 /**
  * Home page
  */
@@ -94,10 +111,16 @@ app.get('/api/analyses', (req, res) => {
 async function runAnalysis(jobId, url) {
   const job = jobs.get(jobId);
   job.status = 'running';
+  job.startedAt = new Date().toISOString();
 
   try {
     const analyzer = new UXDesignAnalyzer();
-    const report = await analyzer.analyzeWebsite(url);
+    const analysisPromise = analyzer.analyzeWebsite(url);
+    // Prevent unhandled rejections if a timeout wins the race.
+    analysisPromise.catch(() => {});
+
+    const timeoutMs = Number(process.env.ANALYSIS_TIMEOUT_MS || 10 * 60 * 1000);
+    const report = await withTimeout(analysisPromise, timeoutMs, 'Analysis');
 
     // Update job with results
     job.status = 'completed';

@@ -186,7 +186,16 @@ class ScreenshotCapture {
    */
   async close() {
     if (this.browser) {
-      await this.browser.close();
+      const browser = this.browser;
+      this.browser = null;
+      try {
+        await Promise.race([
+          browser.close(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('browser.close timeout')), 10000)),
+        ]);
+      } catch {
+        // best-effort
+      }
       console.log('Browser closed');
     }
   }
